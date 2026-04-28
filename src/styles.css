@@ -189,5 +189,4 @@
   .animate-scale-in { animation: scale-in 0.5s cubic-bezier(0.22,1,0.36,1); }
   .animate-pulse-ring { animation: pulse-ring 1.5s ease-out infinite; }
   .animate-wave { animation: wave 0.8s ease-in-out infinite; }
-  }
 }
