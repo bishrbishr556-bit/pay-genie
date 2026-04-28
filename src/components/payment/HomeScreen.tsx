@@ -1,43 +1,235 @@
+import { useEffect, useState } from "react";
 import { useStore, playClick, vibrate } from "@/lib/payment-store";
-import { Bell, Wifi, WifiOff, QrCode, Send, Smartphone, Zap, Tv, Droplet, Gift, TrendingUp, Store, Sparkles } from "lucide-react";
+import {
+  Bell, Wifi, WifiOff, QrCode, Send, Smartphone, Zap, Tv, Droplet, Gift,
+  TrendingUp, Store, Volume2, MoreHorizontal, Eye, EyeOff, Plus, History,
+  FileDown, Sparkles, Flame, Users, ChevronRight, Gamepad2, CircleDot,
+  Ticket, Coins, ShieldCheck, BarChart3,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import type { Tab } from "./BottomNav";
+import { MoreOptionsSheet, type MoreOptionId } from "./MoreOptionsSheet";
+import type { LucideIcon } from "lucide-react";
 
-export function HomeScreen({ onNavigate, online, onInstall, canInstall }: { onNavigate: (t: Tab | "soundbox" | "merchant" | "scanner") => void; online: boolean; onInstall: () => void; canInstall: boolean }) {
+type NavTarget = Tab | "soundbox" | "merchant" | "scanner";
+
+const NOTIF = [
+  { icon: "💰", text: "You got ₹50 cashback" },
+  { icon: "🎡", text: "Spin available now" },
+  { icon: "🔥", text: "3-day streak — keep it up!" },
+  { icon: "🎁", text: "New scratch card unlocked" },
+];
+
+export function HomeScreen({
+  onNavigate, online, onInstall, canInstall, onPickMore,
+}: {
+  onNavigate: (t: NavTarget) => void;
+  online: boolean;
+  onInstall: () => void;
+  canInstall: boolean;
+  onPickMore: (id: MoreOptionId) => void;
+}) {
   const balance = useStore((s) => s.balance);
   const cashback = useStore((s) => s.cashback);
   const txns = useStore((s) => s.txns);
+  const rewards = useStore((s) => s.rewards);
+
+  const [hideBal, setHideBal] = useState(false);
+  const [showMore, setShowMore] = useState(false);
+  const [notifIdx, setNotifIdx] = useState(0);
+  const [coins] = useState(420);
+  const streak = 3;
+
+  useEffect(() => {
+    const t = setInterval(() => setNotifIdx((i) => (i + 1) % NOTIF.length), 3500);
+    return () => clearInterval(t);
+  }, []);
+
+  const unscratched = rewards.filter((r) => !r.scratched).length;
 
   return (
-    <div className="pb-24 overflow-y-auto h-full">
-      {/* Header */}
-      <div className="gradient-primary text-primary-foreground px-5 pt-12 pb-8 rounded-b-3xl shadow-card">
-        <div className="flex items-center justify-between mb-6">
+    <div className="pb-24 overflow-y-auto h-full bg-background">
+      {/* Header gradient */}
+      <div className="relative gradient-primary text-primary-foreground px-5 pt-12 pb-10 rounded-b-[28px] shadow-card overflow-hidden">
+        <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+        <div className="absolute bottom-0 -left-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
+
+        <div className="relative flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center font-bold">
-              U
-            </div>
+            <div className="h-9 w-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center font-bold">U</div>
             <div>
-              <p className="text-xs opacity-80">Hello,</p>
+              <p className="text-[10px] opacity-80">Hello,</p>
               <p className="font-semibold text-sm">User</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1 text-[10px] bg-white/15 px-2 py-1 rounded-full">
+              <ShieldCheck className="h-3 w-3" /> Secured
+            </span>
             {online ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4 text-yellow-200" />}
-            <Bell className="h-5 w-5" />
+            <button onClick={() => { playClick(); vibrate(10); }}>
+              <Bell className="h-5 w-5" />
+            </button>
+            <button
+              aria-label="More options"
+              onClick={() => { playClick(); vibrate(15); setShowMore(true); }}
+              className="h-8 w-8 rounded-full bg-white/20 backdrop-blur flex items-center justify-center active:scale-90 transition-transform"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </button>
           </div>
         </div>
-        <p className="text-xs opacity-80 mb-1">Available balance</p>
-        <p className="text-4xl font-bold tracking-tight">₹{balance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
-        <p className="text-xs opacity-70 mt-1">A/c XX1234 · HDFC Bank</p>
+
+        {/* Balance card glass */}
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-xs opacity-80">Available balance</p>
+            <button onClick={() => { playClick(); setHideBal((v) => !v); }} className="opacity-80">
+              {hideBal ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+          <motion.p
+            key={hideBal ? "h" : balance}
+            initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+            className="text-4xl font-bold tracking-tight"
+          >
+            {hideBal ? "₹ ••••••" : `₹${balance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`}
+          </motion.p>
+          <p className="text-[11px] opacity-70 mt-1">A/c XX1234 · HDFC Bank</p>
+
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            <MiniBal label="Cashback" value={`₹${cashback}`} icon="🪙" />
+            <MiniBal label="Coins" value={String(coins)} icon="💎" />
+            <MiniBal label="Rewards" value={String(unscratched)} icon="🎁" />
+          </div>
+
+          <div className="flex gap-2 mt-3">
+            <SmallBtn icon={Plus} label="Add Money" onClick={() => onPickMore("add-bank")} />
+            <SmallBtn icon={History} label="History" onClick={() => onNavigate("history")} />
+            <SmallBtn icon={FileDown} label="Receipt" onClick={() => onPickMore("receipt")} />
+          </div>
+        </div>
+      </div>
+
+      {/* Notification banner */}
+      <div className="mx-5 -mt-5 relative z-10">
+        <div className="bg-card/95 backdrop-blur rounded-2xl shadow-card px-3 py-2.5 flex items-center gap-2 overflow-hidden">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+          <AnimatePresence mode="wait">
+            <motion.div key={notifIdx}
+              initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -14, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="text-xs font-medium flex items-center gap-2 flex-1 min-w-0"
+            >
+              <span>{NOTIF[notifIdx].icon}</span>
+              <span className="truncate">{NOTIF[notifIdx].text}</span>
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Quick actions */}
-      <div className="px-5 -mt-4">
+      <div className="px-5 mt-4">
+        <div className="bg-card rounded-2xl shadow-card p-4 grid grid-cols-5 gap-2">
+          <QuickAction icon={Send} label="Send" color="from-blue-500 to-blue-600" onClick={() => onNavigate("pay")} />
+          <QuickAction icon={QrCode} label="Scan" color="from-purple-500 to-fuchsia-600" onClick={() => onNavigate("scanner")} />
+          <QuickAction icon={Store} label="Merchant" color="from-orange-500 to-amber-600" onClick={() => onNavigate("merchant")} />
+          <QuickAction icon={Volume2} label="SoundBox" color="from-pink-500 to-rose-600" onClick={() => onNavigate("soundbox")} />
+          <QuickAction icon={MoreHorizontal} label="More" color="from-slate-500 to-slate-700" onClick={() => { setShowMore(true); }} />
+        </div>
+      </div>
+
+      {/* Spin & Rewards interactive widget */}
+      <button
+        onClick={() => { playClick(); vibrate(20); onNavigate("rewards"); }}
+        className="mx-5 mt-4 w-[calc(100%-2.5rem)] relative overflow-hidden rounded-2xl p-4 text-left shadow-card active:scale-[0.98] transition-transform
+                   bg-gradient-to-br from-amber-400 via-orange-500 to-pink-500 text-white"
+      >
+        <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/20 blur-xl" />
+        <div className="relative flex items-center gap-3">
+          <motion.div
+            animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
+            className="h-14 w-14 rounded-full bg-white/25 backdrop-blur flex items-center justify-center shadow-inner"
+          >
+            <CircleDot className="h-8 w-8" />
+          </motion.div>
+          <div className="flex-1">
+            <p className="font-bold text-sm">🎡 Spin & Win Daily</p>
+            <p className="text-[11px] opacity-90">2 spins available · {unscratched} scratch cards</p>
+            <div className="mt-2 h-1.5 bg-white/30 rounded-full overflow-hidden">
+              <div className="h-full w-2/3 bg-white rounded-full" />
+            </div>
+            <p className="text-[10px] mt-1 opacity-90">XP · Beginner Lv 1 · Next reward in 2 spins</p>
+          </div>
+          <div className="bg-white text-orange-600 text-xs font-bold px-3 py-1.5 rounded-full">SPIN</div>
+        </div>
+      </button>
+
+      {/* Play & Earn */}
+      <div className="px-5 mt-5">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold flex items-center gap-1.5"><Gamepad2 className="h-4 w-4" /> Play & Earn</h3>
+          <button onClick={() => onNavigate("rewards")} className="text-[11px] text-primary font-semibold flex items-center">View all <ChevronRight className="h-3 w-3" /></button>
+        </div>
+        <div className="flex gap-2 overflow-x-auto -mx-5 px-5 pb-1 scrollbar-hide">
+          <GameCard icon={CircleDot} label="Spin Wheel" color="from-fuchsia-500 to-purple-600" onClick={() => onPickMore("spin")} />
+          <GameCard icon={Ticket} label="Scratch" color="from-blue-500 to-cyan-500" onClick={() => onPickMore("scratch")} />
+          <GameCard icon={Gift} label="Mystery Box" color="from-amber-500 to-orange-500" onClick={() => onPickMore("mystery")} />
+          <GameCard icon={Coins} label="Tap & Earn" color="from-emerald-500 to-green-600" onClick={() => onPickMore("play")} />
+        </div>
+      </div>
+
+      {/* Bills & Recharge */}
+      <div className="px-5 mt-5">
+        <h3 className="text-sm font-semibold mb-2">Bills & Recharge</h3>
         <div className="bg-card rounded-2xl shadow-card p-4 grid grid-cols-4 gap-3">
-          <QuickAction icon={Send} label="Send" color="bg-blue-500" onClick={() => onNavigate("pay")} />
-          <QuickAction icon={QrCode} label="Scan" color="bg-purple-500" onClick={() => onNavigate("scanner")} />
-          <QuickAction icon={Store} label="Merchant" color="bg-orange-500" onClick={() => onNavigate("merchant")} />
-          <QuickAction icon={Sparkles} label="SoundBox" color="bg-pink-500" onClick={() => onNavigate("soundbox")} />
+          <QuickAction icon={Smartphone} label="Mobile"   color="from-emerald-500 to-teal-600" onClick={() => onPickMore("recharge")} />
+          <QuickAction icon={Zap}        label="Electric" color="from-amber-500 to-orange-600" onClick={() => onPickMore("bills")} />
+          <QuickAction icon={Tv}         label="DTH"      color="from-rose-500 to-pink-600"    onClick={() => onPickMore("bills")} />
+          <QuickAction icon={Droplet}    label="Water"    color="from-sky-500 to-blue-600"     onClick={() => onPickMore("bills")} />
+        </div>
+      </div>
+
+      {/* Streak + Referral */}
+      <div className="px-5 mt-5 grid grid-cols-2 gap-3">
+        <div className="bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-2xl p-3 shadow-card">
+          <div className="flex items-center gap-1 text-[11px] font-semibold opacity-90">
+            <Flame className="h-3.5 w-3.5" /> Daily Streak
+          </div>
+          <p className="text-2xl font-bold mt-1">{streak} 🔥</p>
+          <div className="h-1.5 bg-white/30 rounded-full mt-2 overflow-hidden">
+            <div className="h-full bg-white" style={{ width: `${(streak / 7) * 100}%` }} />
+          </div>
+          <p className="text-[10px] opacity-90 mt-1">Day {streak}/7 · Jackpot on Day 7</p>
+        </div>
+        <button onClick={() => onPickMore("refer")} className="text-left bg-gradient-to-br from-violet-500 to-indigo-600 text-white rounded-2xl p-3 shadow-card active:scale-[0.98] transition-transform">
+          <div className="flex items-center gap-1 text-[11px] font-semibold opacity-90">
+            <Users className="h-3.5 w-3.5" /> Refer & Earn
+          </div>
+          <p className="text-sm font-bold mt-1">Invite & get ₹100</p>
+          <div className="h-1.5 bg-white/30 rounded-full mt-2 overflow-hidden">
+            <div className="h-full bg-white w-2/5" />
+          </div>
+          <p className="text-[10px] opacity-90 mt-1">2/5 invites · +1 spin each</p>
+        </button>
+      </div>
+
+      {/* Mini analytics */}
+      <div className="px-5 mt-5">
+        <div className="bg-card rounded-2xl shadow-card p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold flex items-center gap-1.5"><BarChart3 className="h-4 w-4" /> This Month</h3>
+            <button onClick={() => onPickMore("analytics")} className="text-[11px] text-primary font-semibold">Details ›</button>
+          </div>
+          <div className="flex items-end gap-1.5 h-16 mt-2">
+            {[40, 65, 30, 80, 55, 90, 70].map((h, i) => (
+              <div key={i} className="flex-1 bg-gradient-to-t from-primary/60 to-primary rounded-t-md" style={{ height: `${h}%` }} />
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-3 mt-3 text-xs">
+            <div><p className="text-muted-foreground">Earned</p><p className="font-bold text-emerald-600">+₹250</p></div>
+            <div><p className="text-muted-foreground">Spent</p><p className="font-bold text-rose-600">-₹1,200</p></div>
+          </div>
         </div>
       </div>
 
@@ -48,58 +240,20 @@ export function HomeScreen({ onNavigate, online, onInstall, canInstall }: { onNa
             <p className="font-semibold text-sm">Install App</p>
             <p className="text-xs opacity-90">Add to home screen for native experience</p>
           </div>
-          <button
-            onClick={() => {
-              playClick();
-              vibrate(20);
-              onInstall();
-            }}
-            className="bg-white text-purple-700 text-xs font-bold px-4 py-2 rounded-full active:scale-95 transition-transform"
-          >
+          <button onClick={() => { playClick(); vibrate(20); onInstall(); }}
+            className="bg-white text-purple-700 text-xs font-bold px-4 py-2 rounded-full active:scale-95 transition-transform">
             Install
           </button>
         </div>
       )}
 
-      {/* Rewards banner */}
-      <button
-        onClick={() => onNavigate("rewards")}
-        className="mx-5 mt-4 w-[calc(100%-2.5rem)] gradient-gold text-slate-900 rounded-2xl p-4 flex items-center gap-3 shadow-card active:scale-[0.98] transition-transform"
-      >
-        <Gift className="h-8 w-8" />
-        <div className="text-left flex-1">
-          <p className="font-bold text-sm">You've earned ₹{cashback} cashback!</p>
-          <p className="text-xs opacity-80">Tap to scratch & spin →</p>
-        </div>
-      </button>
-
-      {/* Bills */}
-      <div className="px-5 mt-6">
-        <h3 className="text-sm font-semibold mb-3 text-foreground">Bills & Recharge</h3>
-        <div className="bg-card rounded-2xl shadow-card p-4 grid grid-cols-4 gap-3">
-          <QuickAction icon={Smartphone} label="Mobile" color="bg-emerald-500" />
-          <QuickAction icon={Zap} label="Electric" color="bg-amber-500" />
-          <QuickAction icon={Tv} label="DTH" color="bg-rose-500" />
-          <QuickAction icon={Droplet} label="Water" color="bg-sky-500" />
-        </div>
-      </div>
-
-      {/* Smart suggestions */}
-      <div className="px-5 mt-6">
-        <h3 className="text-sm font-semibold mb-3 text-foreground">For you</h3>
-        <div className="space-y-2">
-          <SuggestCard icon="💸" title="Send to Rahim" sub="You sent ₹500 last week" />
-          <SuggestCard icon="📱" title="Recharge due soon" sub="Airtel prepaid · expires in 3 days" />
-          <SuggestCard icon="🎁" title="₹1000 cashback offer" sub="On bill payments above ₹500" />
-        </div>
-      </div>
-
       {/* Recent */}
       {txns.length > 0 && (
-        <div className="px-5 mt-6">
-          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-foreground">
-            <TrendingUp className="h-4 w-4" /> Recent activity
-          </h3>
+        <div className="px-5 mt-5">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold flex items-center gap-1.5"><TrendingUp className="h-4 w-4" /> Recent activity</h3>
+            <button onClick={() => onNavigate("history")} className="text-[11px] text-primary font-semibold">View all ›</button>
+          </div>
           <div className="bg-card rounded-2xl shadow-card divide-y divide-border">
             {txns.slice(0, 3).map((t) => (
               <div key={t.id} className="p-3 flex items-center gap-3">
@@ -118,24 +272,61 @@ export function HomeScreen({ onNavigate, online, onInstall, canInstall }: { onNa
           </div>
         </div>
       )}
+
+      {/* Smart suggestions */}
+      <div className="px-5 mt-5 mb-4">
+        <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5"><Sparkles className="h-4 w-4" /> For you</h3>
+        <div className="space-y-2">
+          <SuggestCard icon="💸" title="Send to Rahim" sub="You sent ₹500 last week" />
+          <SuggestCard icon="📱" title="Recharge due soon" sub="Airtel prepaid · expires in 3 days" />
+          <SuggestCard icon="🎁" title="₹1000 cashback offer" sub="On bill payments above ₹500" />
+        </div>
+      </div>
+
+      <MoreOptionsSheet open={showMore} onClose={() => setShowMore(false)} onPick={(id) => { setShowMore(false); onPickMore(id); }} />
     </div>
   );
 }
 
-function QuickAction({ icon: Icon, label, color, onClick }: { icon: typeof Send; label: string; color: string; onClick?: () => void }) {
+function MiniBal({ label, value, icon }: { label: string; value: string; icon: string }) {
+  return (
+    <div className="bg-white/15 backdrop-blur rounded-xl px-2 py-2 text-center">
+      <p className="text-[10px] opacity-80">{icon} {label}</p>
+      <p className="font-bold text-sm mt-0.5">{value}</p>
+    </div>
+  );
+}
+
+function SmallBtn({ icon: Icon, label, onClick }: { icon: LucideIcon; label: string; onClick?: () => void }) {
+  return (
+    <button onClick={() => { playClick(); vibrate(10); onClick?.(); }}
+      className="flex-1 bg-white/15 backdrop-blur rounded-xl py-2 flex items-center justify-center gap-1 text-[11px] font-semibold active:scale-95 transition-transform">
+      <Icon className="h-3.5 w-3.5" /> {label}
+    </button>
+  );
+}
+
+function QuickAction({ icon: Icon, label, color, onClick }: { icon: LucideIcon; label: string; color: string; onClick?: () => void }) {
   return (
     <button
-      onClick={() => {
-        playClick();
-        vibrate(15);
-        onClick?.();
-      }}
+      onClick={() => { playClick(); vibrate(15); onClick?.(); }}
       className="flex flex-col items-center gap-1.5 active:scale-90 transition-transform"
     >
-      <div className={`h-12 w-12 rounded-2xl ${color} text-white flex items-center justify-center shadow-sm`}>
+      <div className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${color} text-white flex items-center justify-center shadow-md`}>
         <Icon className="h-5 w-5" />
       </div>
       <span className="text-[11px] font-medium text-foreground">{label}</span>
+    </button>
+  );
+}
+
+function GameCard({ icon: Icon, label, color, onClick }: { icon: LucideIcon; label: string; color: string; onClick?: () => void }) {
+  return (
+    <button onClick={() => { playClick(); vibrate(15); onClick?.(); }}
+      className={`shrink-0 w-24 rounded-2xl p-3 text-white text-left bg-gradient-to-br ${color} active:scale-95 transition-transform shadow-md`}>
+      <Icon className="h-6 w-6 mb-2" />
+      <p className="text-xs font-bold leading-tight">{label}</p>
+      <p className="text-[10px] opacity-80 mt-0.5">Tap to play</p>
     </button>
   );
 }
