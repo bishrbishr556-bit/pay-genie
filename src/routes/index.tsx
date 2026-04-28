@@ -11,7 +11,7 @@ import { ProfileScreen } from "@/components/payment/ProfileScreen";
 import { MerchantScreen } from "@/components/payment/MerchantScreen";
 import { ScannerScreen } from "@/components/payment/ScannerScreen";
 import { LockScreen } from "@/components/payment/LockScreen";
-import { initStore, useStore, actions } from "@/lib/payment-store";
+import { initStore, useStore } from "@/lib/payment-store";
 import { WifiOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
