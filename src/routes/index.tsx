@@ -11,6 +11,9 @@ import { ProfileScreen } from "@/components/payment/ProfileScreen";
 import { MerchantScreen } from "@/components/payment/MerchantScreen";
 import { ScannerScreen } from "@/components/payment/ScannerScreen";
 import { LockScreen } from "@/components/payment/LockScreen";
+import { StubScreen } from "@/components/payment/StubScreen";
+import { RechargeScreen, type RechargeKind } from "@/components/payment/RechargeScreen";
+import type { MoreOptionId } from "@/components/payment/MoreOptionsSheet";
 import { initStore, useStore } from "@/lib/payment-store";
 import { WifiOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,6 +38,8 @@ type Screen = Tab | "merchant" | "scanner";
 function Index() {
   const [tab, setTab] = useState<Tab>("home");
   const [overlay, setOverlay] = useState<"merchant" | "scanner" | null>(null);
+  const [moreOpt, setMoreOpt] = useState<MoreOptionId | null>(null);
+  const [rechargeKind, setRechargeKind] = useState<RechargeKind | null>(null);
   const [online, setOnline] = useState(true);
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [openRewardId, setOpenRewardId] = useState<string | null>(null);
@@ -94,6 +99,20 @@ function Index() {
     }
   };
 
+  const onPickMore = (id: MoreOptionId) => {
+    // Route to existing real flows when possible.
+    if (id === "send")     { setOverlay(null); setTab("pay"); return; }
+    if (id === "scan")     { setOverlay("scanner"); return; }
+    if (id === "soundbox") { window.open("/soundbox", "_blank"); return; }
+    if (id === "history")  { setOverlay(null); setTab("history"); return; }
+    if (id === "spin" || id === "scratch" || id === "mystery" || id === "play" || id === "wallet") {
+      setOverlay(null); setTab("rewards"); return;
+    }
+    if (id === "recharge") { setRechargeKind("mobile"); return; }
+    if (id === "bills")    { setRechargeKind("electric"); return; }
+    setMoreOpt(id);
+  };
+
   if (!unlocked) {
     return (
       <PhoneFrame>
@@ -119,7 +138,19 @@ function Index() {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
-        {overlay === "merchant" ? (
+        {rechargeKind ? (
+          <motion.div key={`r-${rechargeKind}`} initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-20">
+            <RechargeScreen kind={rechargeKind} onBack={() => setRechargeKind(null)} />
+          </motion.div>
+        ) : moreOpt ? (
+          <motion.div key={`mo-${moreOpt}`} initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-20">
+            <StubScreen
+              title={prettyTitle(moreOpt)}
+              subtitle="Secure · Instant · Verified"
+              onBack={() => setMoreOpt(null)}
+            />
+          </motion.div>
+        ) : overlay === "merchant" ? (
           <motion.div key="m" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-20">
             <MerchantScreen onBack={() => setOverlay(null)} />
           </motion.div>
@@ -135,6 +166,7 @@ function Index() {
                 online={online}
                 onInstall={handleInstall}
                 canInstall={!!installEvent}
+                onPickMore={onPickMore}
               />
             )}
             {tab === "pay" && <PayScreen onBack={() => setTab("home")} onShowReward={(id) => { setOpenRewardId(id); setTab("rewards"); }} />}
@@ -145,10 +177,24 @@ function Index() {
         )}
       </AnimatePresence>
 
-      <BottomNav active={tab} onChange={(t) => { setOverlay(null); setTab(t); }} />
+      <BottomNav active={tab} onChange={(t) => { setOverlay(null); setMoreOpt(null); setRechargeKind(null); setTab(t); }} />
       <Toaster position="top-center" />
     </PhoneFrame>
   );
+}
+
+function prettyTitle(id: MoreOptionId): string {
+  const map: Record<MoreOptionId, string> = {
+    send: "Send Money", request: "Request Money", scan: "Scan QR", recharge: "Mobile Recharge",
+    bills: "Pay Bills", "bank-transfer": "Bank Transfer", "upi-id": "UPI ID", self: "Self Transfer",
+    approve: "Approve to Pay", intl: "International Transfer",
+    spin: "Spin Wheel", scratch: "Scratch Cards", mystery: "Mystery Box", play: "Play & Earn", wallet: "Rewards Wallet",
+    history: "Transaction History", receipt: "Download Receipt", analytics: "Analytics Dashboard", spending: "Spending Summary", statement: "Monthly Statement",
+    "add-bank": "Add Bank Account", cards: "Manage Cards", "change-pin": "Change PIN", security: "Security Settings", account: "Account Details",
+    soundbox: "Sound Box", offline: "Offline Payment", offers: "Offers", refer: "Refer & Earn", invite: "Invite Friends",
+    settings: "Settings", dark: "Dark Mode", language: "Language", help: "Help & Support", about: "About Us",
+  };
+  return map[id];
 }
 
 // satisfy unused warning
