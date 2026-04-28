@@ -36,7 +36,7 @@ function Index() {
   const [tab, setTab] = useState<Tab>("home");
   const [overlay, setOverlay] = useState<"merchant" | "scanner" | null>(null);
   const [online, setOnline] = useState(true);
-  const [installEvent, setInstallEvent] = useState<{ prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> } | null>(null);
+  const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [openRewardId, setOpenRewardId] = useState<string | null>(null);
   const unlocked = useStore((s) => s.unlocked);
 
@@ -52,7 +52,7 @@ function Index() {
 
     const onInstall = (e: Event) => {
       e.preventDefault();
-      setInstallEvent(e as unknown as typeof installEvent extends infer T ? T : never);
+      setInstallEvent(e as BeforeInstallPromptEvent);
     };
     window.addEventListener("beforeinstallprompt", onInstall);
 
@@ -145,3 +145,8 @@ function Index() {
 
 // satisfy unused warning
 export type { Screen };
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: string }>;
+}
