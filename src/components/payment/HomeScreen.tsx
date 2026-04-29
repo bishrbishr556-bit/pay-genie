@@ -4,7 +4,7 @@ import {
   Bell, Wifi, WifiOff, QrCode, Send, Smartphone, Zap, Tv, Droplet, Gift,
   TrendingUp, Store, Volume2, MoreHorizontal, Eye, EyeOff, Plus, History,
   FileDown, Sparkles, Flame, Users, ChevronRight, Gamepad2, CircleDot,
-  Ticket, Coins, ShieldCheck, BarChart3,
+  Ticket, Coins, ShieldCheck, BarChart3, Bot, Mic, Receipt,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Tab } from "./BottomNav";
@@ -128,6 +128,47 @@ export function HomeScreen({
         </div>
       </div>
 
+      {/* Smart Assistant card */}
+      <div className="px-5 mt-4">
+        <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 text-white rounded-2xl p-4 shadow-card">
+          <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-white/15 blur-xl" />
+          <div className="relative flex items-start gap-3">
+            <div className="h-10 w-10 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center shrink-0">
+              <Bot className="h-5 w-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <p className="font-semibold text-sm">Smart Assistant</p>
+                <span className="text-[9px] bg-white/20 rounded-full px-1.5 py-0.5">AI</span>
+              </div>
+              <motion.p initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="text-xs opacity-90 mt-1">
+                ⚡ Your electricity bill of <b>₹420</b> is due in 2 days. Want to pay now and earn ₹5 cashback?
+              </motion.p>
+              <div className="flex gap-2 mt-3">
+                <button onClick={() => { playClick(); vibrate(15); onPickMore("bills"); }}
+                  className="bg-white text-violet-700 text-[11px] font-bold px-3 py-1.5 rounded-full active:scale-95 transition-transform">
+                  Pay Now
+                </button>
+                <button onClick={() => { playClick(); vibrate(10); onPickMore("voice-pay"); }}
+                  className="flex items-center gap-1 bg-white/20 backdrop-blur text-[11px] font-semibold px-3 py-1.5 rounded-full active:scale-95 transition-transform">
+                  <Mic className="h-3 w-3" /> Voice Pay
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Pay shortcuts */}
+      <div className="px-5 mt-3">
+        <div className="flex gap-2 overflow-x-auto -mx-5 px-5 scrollbar-hide pb-1">
+          <QuickChip emoji="💸" label="Pay Rahim ₹500" onClick={() => onNavigate("pay")} />
+          <QuickChip emoji="📱" label="Recharge ₹199" onClick={() => onPickMore("recharge")} />
+          <QuickChip emoji="⚡" label="Electric ₹420" onClick={() => onPickMore("bills")} />
+          <QuickChip emoji="🧾" label="Split Bill" onClick={() => onPickMore("split-bill")} />
+        </div>
+      </div>
+
       {/* Quick actions */}
       <div className="px-5 mt-4">
         <div className="bg-card rounded-2xl shadow-card p-4 grid grid-cols-5 gap-2">
@@ -136,6 +177,20 @@ export function HomeScreen({
           <QuickAction icon={Store} label="Merchant" color="from-orange-500 to-amber-600" onClick={() => onNavigate("merchant")} />
           <QuickAction icon={Volume2} label="SoundBox" color="from-pink-500 to-rose-600" onClick={() => onNavigate("soundbox")} />
           <QuickAction icon={MoreHorizontal} label="More" color="from-slate-500 to-slate-700" onClick={() => { setShowMore(true); }} />
+        </div>
+      </div>
+
+      {/* Pending Bills widget */}
+      <div className="px-5 mt-4">
+        <div className="bg-card rounded-2xl shadow-card p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold flex items-center gap-1.5"><Receipt className="h-4 w-4" /> Pending Bills</h3>
+            <span className="text-[10px] bg-rose-500/15 text-rose-600 font-semibold px-2 py-0.5 rounded-full">2 due</span>
+          </div>
+          <div className="space-y-2">
+            <PendingBill icon={Zap} color="from-amber-500 to-orange-500" name="Electricity (KSEB)" due="Due in 2 days" amount={420} onPay={() => onPickMore("bills")} />
+            <PendingBill icon={Smartphone} color="from-emerald-500 to-teal-600" name="Airtel Prepaid" due="Expires in 3 days" amount={199} onPay={() => onPickMore("recharge")} />
+          </div>
         </div>
       </div>
 
@@ -338,6 +393,36 @@ function SuggestCard({ icon, title, sub }: { icon: string; title: string; sub: s
       <div className="flex-1">
         <p className="text-sm font-semibold">{title}</p>
         <p className="text-xs text-muted-foreground">{sub}</p>
+      </div>
+    </div>
+  );
+}
+
+function QuickChip({ emoji, label, onClick }: { emoji: string; label: string; onClick: () => void }) {
+  return (
+    <button onClick={() => { playClick(); vibrate(10); onClick(); }}
+      className="shrink-0 flex items-center gap-1.5 bg-card border border-border rounded-full px-3 py-1.5 text-xs font-semibold shadow-sm active:scale-95 transition-transform">
+      <span>{emoji}</span><span>{label}</span>
+    </button>
+  );
+}
+
+function PendingBill({ icon: Icon, color, name, due, amount, onPay }: { icon: LucideIcon; color: string; name: string; due: string; amount: number; onPay: () => void }) {
+  return (
+    <div className="flex items-center gap-3 p-2 rounded-xl bg-muted/40">
+      <div className={`h-9 w-9 rounded-xl bg-gradient-to-br ${color} text-white flex items-center justify-center shadow-sm`}>
+        <Icon className="h-4 w-4" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate">{name}</p>
+        <p className="text-[11px] text-muted-foreground">{due}</p>
+      </div>
+      <div className="text-right">
+        <p className="text-sm font-bold">₹{amount}</p>
+        <button onClick={() => { playClick(); vibrate(15); onPay(); }}
+          className="text-[10px] font-bold bg-primary text-primary-foreground px-2.5 py-1 rounded-full active:scale-95 transition-transform">
+          Pay Now
+        </button>
       </div>
     </div>
   );
