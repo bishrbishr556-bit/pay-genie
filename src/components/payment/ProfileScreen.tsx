@@ -1,22 +1,55 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   ChevronLeft, ChevronRight, BadgeCheck, ShieldCheck, CreditCard, Lock, EyeOff, Bell,
-  Palette, Globe, HelpCircle, Users, Activity, Smartphone, Trash2, Store, Volume2,
+  Palette, Globe, HelpCircle, Users, Activity, Smartphone, Trash2, Store, Volume2, Pencil, Check,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { actions, playClick, vibrate } from "@/lib/payment-store";
+import type { MoreOptionId } from "./MoreOptionsSheet";
 
 type Row = { icon: LucideIcon; label: string; sub: string; tint: string; onClick?: () => void; danger?: boolean };
 type Section = { title: string; rows: Row[] };
 
-export function ProfileScreen({ onMerchant, onSoundbox }: { onMerchant: () => void; onSoundbox: () => void }) {
+export function ProfileScreen({
+  onMerchant,
+  onSoundbox,
+  onPickMore,
+}: {
+  onMerchant: () => void;
+  onSoundbox: () => void;
+  onPickMore: (id: MoreOptionId) => void;
+}) {
   const [dark, setDark] = useState(false);
+  const [name, setName] = useState("User Name");
+  const [phone, setPhone] = useState("+91 98765 43210");
+  const [editing, setEditing] = useState(false);
+  const nameRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     const saved = localStorage.getItem("theme") === "dark";
     setDark(saved);
     if (saved) document.documentElement.classList.add("dark");
+    const n = localStorage.getItem("gpay-user-name");
+    const p = localStorage.getItem("gpay-user-phone");
+    if (n) setName(n);
+    if (p) setPhone(p);
   }, []);
+
+  useEffect(() => {
+    if (editing) nameRef.current?.focus();
+  }, [editing]);
+
+  const saveProfile = () => {
+    const n = name.trim() || "User Name";
+    const p = phone.trim() || "+91 98765 43210";
+    setName(n); setPhone(p);
+    localStorage.setItem("gpay-user-name", n);
+    localStorage.setItem("gpay-user-phone", p);
+    setEditing(false);
+    playClick(); vibrate(15);
+  };
+
   const toggleDark = () => {
     const next = !dark;
     setDark(next);
@@ -26,23 +59,25 @@ export function ProfileScreen({ onMerchant, onSoundbox }: { onMerchant: () => vo
   };
 
   const tap = (fn?: () => void) => () => { playClick(); vibrate(15); fn?.(); };
+  const go = (id: MoreOptionId) => () => { playClick(); vibrate(15); onPickMore(id); };
 
   const sections: Section[] = [
     {
       title: "Account & Security",
       rows: [
-        { icon: BadgeCheck, label: "Profile Verification", sub: "Verify your identity", tint: "from-emerald-500 to-teal-600" },
-        { icon: CreditCard, label: "UPI & Payment Settings", sub: "Manage UPI ID, linked accounts & limits", tint: "from-violet-500 to-purple-600" },
-        { icon: ShieldCheck, label: "Security Center", sub: "Manage PIN, biometric & security", tint: "from-blue-500 to-sky-600" },
-        { icon: EyeOff, label: "Privacy Controls", sub: "Control who can see your information", tint: "from-cyan-500 to-teal-600" },
-        { icon: Bell, label: "Notification Settings", sub: "Customize alerts & notifications", tint: "from-amber-500 to-orange-500" },
+        { icon: BadgeCheck, label: "Profile Verification", sub: "Verify your identity", tint: "from-emerald-500 to-teal-600", onClick: () => onPickMore("verify") },
+        { icon: CreditCard, label: "UPI & Payment Settings", sub: "Manage UPI ID, linked accounts & limits", tint: "from-violet-500 to-purple-600", onClick: () => onPickMore("upi-id") },
+        { icon: ShieldCheck, label: "Security Center", sub: "Manage PIN, biometric & security", tint: "from-blue-500 to-sky-600", onClick: () => onPickMore("security") },
+        { icon: Lock, label: "Change PIN", sub: "Update your 4-digit secure PIN", tint: "from-orange-500 to-amber-600", onClick: () => onPickMore("change-pin") },
+        { icon: EyeOff, label: "Privacy Controls", sub: "Control who can see your information", tint: "from-cyan-500 to-teal-600", onClick: () => onPickMore("privacy") },
+        { icon: Bell, label: "Notification Settings", sub: "Customize alerts & notifications", tint: "from-amber-500 to-orange-500", onClick: () => onPickMore("notifications") },
       ],
     },
     {
       title: "Preferences",
       rows: [
         { icon: Palette, label: dark ? "Theme: Dark" : "Theme & Appearance", sub: "Choose app theme & display mode", tint: "from-pink-500 to-rose-600", onClick: toggleDark },
-        { icon: Globe, label: "Language", sub: "Select your preferred language", tint: "from-blue-500 to-indigo-600" },
+        { icon: Globe, label: "Language", sub: "Select your preferred language", tint: "from-blue-500 to-indigo-600", onClick: () => onPickMore("language") },
       ],
     },
     {
@@ -55,14 +90,15 @@ export function ProfileScreen({ onMerchant, onSoundbox }: { onMerchant: () => vo
     {
       title: "Support & More",
       rows: [
-        { icon: HelpCircle, label: "Help & Support", sub: "Get help, FAQs and contact support", tint: "from-amber-500 to-yellow-500" },
-        { icon: Users, label: "Refer & Earn", sub: "Invite friends and earn rewards", tint: "from-emerald-500 to-teal-600" },
-        { icon: Activity, label: "Account Activity", sub: "View recent logins & account activity", tint: "from-rose-500 to-red-500" },
-        { icon: Smartphone, label: "Manage Devices", sub: "Manage devices linked to your account", tint: "from-slate-500 to-slate-700" },
-        { icon: Trash2, label: "Delete Account", sub: "Permanently delete your account", tint: "from-red-500 to-rose-700", danger: true },
+        { icon: HelpCircle, label: "Help & Support", sub: "Get help, FAQs and contact support", tint: "from-amber-500 to-yellow-500", onClick: () => onPickMore("help") },
+        { icon: Users, label: "Refer & Earn", sub: "Invite friends and earn rewards", tint: "from-emerald-500 to-teal-600", onClick: () => onPickMore("refer") },
+        { icon: Activity, label: "Account Activity", sub: "View recent logins & account activity", tint: "from-rose-500 to-red-500", onClick: () => onPickMore("activity") },
+        { icon: Smartphone, label: "Manage Devices", sub: "Manage devices linked to your account", tint: "from-slate-500 to-slate-700", onClick: () => onPickMore("devices") },
+        { icon: Trash2, label: "Delete Account", sub: "Permanently delete your account", tint: "from-red-500 to-rose-700", danger: true, onClick: () => onPickMore("delete-account") },
       ],
     },
   ];
+  void go; // silence unused
 
   return (
     <div className="h-full overflow-y-auto bg-slate-950 text-slate-100 pb-28">
@@ -78,25 +114,53 @@ export function ProfileScreen({ onMerchant, onSoundbox }: { onMerchant: () => vo
         <h1 className="flex-1 text-center text-base font-bold pr-9">Profile Settings</h1>
       </div>
 
-      {/* User card */}
+      {/* User card — editable */}
       <div className="px-4 mt-1">
-        <motion.button
-          onClick={tap()}
-          whileTap={{ scale: 0.98 }}
+        <motion.div
+          whileTap={editing ? undefined : { scale: 0.98 }}
           className="w-full bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center gap-3 text-left"
         >
           <div className="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-lg font-bold text-white shadow-lg">
-            U
+            {(name || "U").trim().charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-[15px] truncate">User Name</p>
-            <p className="text-xs text-slate-400">+91 98765 43210</p>
-            <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-emerald-400">
-              <BadgeCheck className="h-3 w-3" /> Verified
-            </span>
+            {editing ? (
+              <div className="space-y-1.5">
+                <input
+                  ref={nameRef}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  maxLength={28}
+                  placeholder="Your name"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-md px-2 py-1 text-[14px] font-semibold outline-none focus:border-emerald-500"
+                />
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  maxLength={20}
+                  placeholder="Phone number"
+                  inputMode="tel"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-md px-2 py-1 text-[12px] outline-none focus:border-emerald-500"
+                />
+              </div>
+            ) : (
+              <>
+                <p className="font-semibold text-[15px] truncate">{name}</p>
+                <p className="text-xs text-slate-400">{phone}</p>
+                <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-emerald-400">
+                  <BadgeCheck className="h-3 w-3" /> Verified
+                </span>
+              </>
+            )}
           </div>
-          <ChevronRight className="h-5 w-5 text-slate-500" />
-        </motion.button>
+          <button
+            onClick={editing ? saveProfile : tap(() => setEditing(true))}
+            className="h-9 w-9 rounded-full bg-slate-800 flex items-center justify-center active:scale-90 transition-transform"
+            aria-label={editing ? "Save profile" : "Edit profile"}
+          >
+            {editing ? <Check className="h-4 w-4 text-emerald-400" /> : <Pencil className="h-4 w-4 text-slate-300" />}
+          </button>
+        </motion.div>
       </div>
 
       {/* Sections */}
