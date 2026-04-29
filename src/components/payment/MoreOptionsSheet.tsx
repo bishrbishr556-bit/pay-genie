@@ -7,6 +7,7 @@ import {
   Zap, RefreshCw, ShieldPlus, Coins, TrendingUp, Gauge, BadgePercent, HeartHandshake,
   Plane, Film, CalendarDays, Calculator, ArrowLeftRight, MapPin, BadgeCheck, Bell,
   Palette, Activity, Trash2, Store, EyeOff,
+  Mic, Split,
 } from "lucide-react";
 import { playClick, vibrate } from "@/lib/payment-store";
 import type { LucideIcon } from "lucide-react";
@@ -20,7 +21,8 @@ export type MoreOptionId =
   | "settings" | "dark" | "language" | "help" | "about"
   | "voucher" | "upi-lite" | "autopay" | "insurance" | "gold" | "mutual-funds" | "credit-score"
   | "loan-offers" | "donations" | "travel" | "movies" | "events" | "emi" | "currency" | "nearby"
-  | "verify" | "privacy" | "notifications" | "theme" | "activity" | "devices" | "delete-account" | "merchant";
+  | "verify" | "privacy" | "notifications" | "theme" | "activity" | "devices" | "delete-account" | "merchant"
+  | "voice-pay" | "split-bill";
 
 type Item = { id: MoreOptionId; label: string; icon: LucideIcon; color: string };
 type Section = { title: string; accent: string; items: Item[] };
@@ -32,6 +34,8 @@ const SECTIONS: Section[] = [
       { id: "send", label: "Send Money", icon: Send, color: "from-blue-500 to-blue-600" },
       { id: "request", label: "Request Money", icon: Download, color: "from-emerald-500 to-emerald-600" },
       { id: "scan", label: "Scan QR", icon: QrCode, color: "from-purple-500 to-purple-600" },
+      { id: "voice-pay", label: "Voice Pay", icon: Mic, color: "from-rose-500 to-pink-600" },
+      { id: "split-bill", label: "Split Bill", icon: Split, color: "from-cyan-500 to-blue-600" },
       { id: "recharge", label: "Mobile Recharge", icon: Smartphone, color: "from-sky-500 to-sky-600" },
       { id: "bills", label: "Pay Bills", icon: Receipt, color: "from-orange-500 to-orange-600" },
       { id: "bank-transfer", label: "Bank Transfer", icon: Building2, color: "from-teal-500 to-teal-600" },
