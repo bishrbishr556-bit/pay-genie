@@ -4,6 +4,9 @@ import {
   CircleDot, Ticket, Gift, Gamepad2, Wallet, History, FileDown, BarChart3, PieChart, FileText,
   Building, CreditCard, Lock, Shield, User, Volume2, WifiOff, Tag, Users, UserPlus,
   Settings, Moon, Languages, Headphones, Info,
+  Zap, RefreshCw, ShieldPlus, Coins, TrendingUp, Gauge, BadgePercent, HeartHandshake,
+  Plane, Film, CalendarDays, Calculator, ArrowLeftRight, MapPin, BadgeCheck, Bell,
+  Palette, Activity, Trash2, Store, EyeOff,
 } from "lucide-react";
 import { playClick, vibrate } from "@/lib/payment-store";
 import type { LucideIcon } from "lucide-react";
@@ -14,7 +17,10 @@ export type MoreOptionId =
   | "history" | "receipt" | "analytics" | "spending" | "statement"
   | "add-bank" | "cards" | "change-pin" | "security" | "account"
   | "soundbox" | "offline" | "offers" | "refer" | "invite"
-  | "settings" | "dark" | "language" | "help" | "about";
+  | "settings" | "dark" | "language" | "help" | "about"
+  | "voucher" | "upi-lite" | "autopay" | "insurance" | "gold" | "mutual-funds" | "credit-score"
+  | "loan-offers" | "donations" | "travel" | "movies" | "events" | "emi" | "currency" | "nearby"
+  | "verify" | "privacy" | "notifications" | "theme" | "activity" | "devices" | "delete-account" | "merchant";
 
 type Item = { id: MoreOptionId; label: string; icon: LucideIcon; color: string };
 type Section = { title: string; accent: string; items: Item[] };
@@ -83,6 +89,44 @@ const SECTIONS: Section[] = [
       { id: "language", label: "Language", icon: Languages, color: "from-blue-500 to-sky-600" },
       { id: "help", label: "Help & Support", icon: Headphones, color: "from-emerald-500 to-teal-600" },
       { id: "about", label: "About Us", icon: Info, color: "from-violet-500 to-purple-700" },
+    ],
+  },
+  {
+    title: "Finance & Investments", accent: "bg-emerald-500",
+    items: [
+      { id: "voucher", label: "Voucher Wallet", icon: Ticket, color: "from-blue-500 to-indigo-600" },
+      { id: "upi-lite", label: "UPI Lite", icon: Zap, color: "from-emerald-500 to-green-600" },
+      { id: "autopay", label: "AutoPay", icon: RefreshCw, color: "from-pink-500 to-rose-600" },
+      { id: "insurance", label: "Insurance", icon: ShieldPlus, color: "from-violet-500 to-purple-600" },
+      { id: "gold", label: "Gold & Silver", icon: Coins, color: "from-amber-500 to-yellow-600" },
+      { id: "mutual-funds", label: "Mutual Funds", icon: TrendingUp, color: "from-emerald-500 to-teal-600" },
+      { id: "credit-score", label: "Credit Score", icon: Gauge, color: "from-purple-500 to-pink-600" },
+      { id: "loan-offers", label: "Loan Offers", icon: BadgePercent, color: "from-rose-500 to-red-600" },
+      { id: "donations", label: "Donations", icon: HeartHandshake, color: "from-pink-500 to-rose-600" },
+    ],
+  },
+  {
+    title: "Lifestyle & Travel", accent: "bg-orange-500",
+    items: [
+      { id: "travel", label: "Travel Bookings", icon: Plane, color: "from-sky-500 to-blue-600" },
+      { id: "movies", label: "Movie Tickets", icon: Film, color: "from-purple-500 to-violet-600" },
+      { id: "events", label: "Event Bookings", icon: CalendarDays, color: "from-orange-500 to-amber-600" },
+      { id: "emi", label: "EMI Calculator", icon: Calculator, color: "from-emerald-500 to-green-600" },
+      { id: "currency", label: "Currency Converter", icon: ArrowLeftRight, color: "from-blue-500 to-cyan-600" },
+      { id: "nearby", label: "Nearby Stores", icon: MapPin, color: "from-pink-500 to-rose-600" },
+    ],
+  },
+  {
+    title: "Profile & Privacy", accent: "bg-violet-500",
+    items: [
+      { id: "verify", label: "Verification", icon: BadgeCheck, color: "from-emerald-500 to-teal-600" },
+      { id: "privacy", label: "Privacy", icon: EyeOff, color: "from-cyan-500 to-teal-600" },
+      { id: "notifications", label: "Notifications", icon: Bell, color: "from-amber-500 to-orange-500" },
+      { id: "theme", label: "Theme", icon: Palette, color: "from-pink-500 to-rose-600" },
+      { id: "merchant", label: "Merchant Mode", icon: Store, color: "from-emerald-500 to-green-600" },
+      { id: "activity", label: "Activity", icon: Activity, color: "from-rose-500 to-red-500" },
+      { id: "devices", label: "Devices", icon: Smartphone, color: "from-slate-500 to-slate-700" },
+      { id: "delete-account", label: "Delete Account", icon: Trash2, color: "from-red-500 to-rose-700" },
     ],
   },
 ];

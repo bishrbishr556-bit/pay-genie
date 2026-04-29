@@ -110,6 +110,7 @@ function Index() {
     }
     if (id === "recharge") { setRechargeKind("mobile"); return; }
     if (id === "bills")    { setRechargeKind("electric"); return; }
+    if (id === "merchant") { setOverlay("merchant"); return; }
     setMoreOpt(id);
   };
 
@@ -172,7 +173,13 @@ function Index() {
             {tab === "pay" && <PayScreen onBack={() => setTab("home")} onShowReward={(id) => { setOpenRewardId(id); setTab("rewards"); }} />}
             {tab === "rewards" && <RewardsScreen openCardId={openRewardId} onClearOpenCard={() => setOpenRewardId(null)} />}
             {tab === "history" && <HistoryScreen />}
-            {tab === "profile" && <ProfileScreen onMerchant={() => setOverlay("merchant")} onSoundbox={() => window.open("/soundbox", "_blank")} />}
+            {tab === "profile" && (
+              <ProfileScreen
+                onMerchant={() => setOverlay("merchant")}
+                onSoundbox={() => window.open("/soundbox", "_blank")}
+                onPickMore={onPickMore}
+              />
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -193,6 +200,14 @@ function prettyTitle(id: MoreOptionId): string {
     "add-bank": "Add Bank Account", cards: "Manage Cards", "change-pin": "Change PIN", security: "Security Settings", account: "Account Details",
     soundbox: "Sound Box", offline: "Offline Payment", offers: "Offers", refer: "Refer & Earn", invite: "Invite Friends",
     settings: "Settings", dark: "Dark Mode", language: "Language", help: "Help & Support", about: "About Us",
+    voucher: "Voucher Wallet", "upi-lite": "UPI Lite", autopay: "AutoPay", insurance: "Insurance",
+    gold: "Gold & Silver", "mutual-funds": "Mutual Funds", "credit-score": "Credit Score",
+    "loan-offers": "Loan Offers", donations: "Donations",
+    travel: "Travel Bookings", movies: "Movie Tickets", events: "Event Bookings",
+    emi: "EMI Calculator", currency: "Currency Converter", nearby: "Nearby Stores",
+    verify: "Profile Verification", privacy: "Privacy Controls", notifications: "Notifications",
+    theme: "Theme & Appearance", activity: "Account Activity", devices: "Manage Devices",
+    "delete-account": "Delete Account", merchant: "Merchant Mode",
   };
   return map[id];
 }
