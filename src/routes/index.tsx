@@ -13,6 +13,8 @@ import { ScannerScreen } from "@/components/payment/ScannerScreen";
 import { LockScreen } from "@/components/payment/LockScreen";
 import { StubScreen } from "@/components/payment/StubScreen";
 import { RechargeScreen, type RechargeKind } from "@/components/payment/RechargeScreen";
+import { VoicePayScreen } from "@/components/payment/VoicePayScreen";
+import { SplitBillScreen } from "@/components/payment/SplitBillScreen";
 import type { MoreOptionId } from "@/components/payment/MoreOptionsSheet";
 import { initStore, useStore } from "@/lib/payment-store";
 import { WifiOff } from "lucide-react";
@@ -40,6 +42,8 @@ function Index() {
   const [overlay, setOverlay] = useState<"merchant" | "scanner" | null>(null);
   const [moreOpt, setMoreOpt] = useState<MoreOptionId | null>(null);
   const [rechargeKind, setRechargeKind] = useState<RechargeKind | null>(null);
+  const [voicePay, setVoicePay] = useState(false);
+  const [splitBill, setSplitBill] = useState(false);
   const [online, setOnline] = useState(true);
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [openRewardId, setOpenRewardId] = useState<string | null>(null);
@@ -111,6 +115,8 @@ function Index() {
     if (id === "recharge") { setRechargeKind("mobile"); return; }
     if (id === "bills")    { setRechargeKind("electric"); return; }
     if (id === "merchant") { setOverlay("merchant"); return; }
+    if (id === "voice-pay") { setVoicePay(true); return; }
+    if (id === "split-bill") { setSplitBill(true); return; }
     setMoreOpt(id);
   };
 
@@ -139,7 +145,15 @@ function Index() {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
-        {rechargeKind ? (
+        {voicePay ? (
+          <motion.div key="vp" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-20">
+            <VoicePayScreen onBack={() => setVoicePay(false)} />
+          </motion.div>
+        ) : splitBill ? (
+          <motion.div key="sb" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-20">
+            <SplitBillScreen onBack={() => setSplitBill(false)} />
+          </motion.div>
+        ) : rechargeKind ? (
           <motion.div key={`r-${rechargeKind}`} initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-20">
             <RechargeScreen kind={rechargeKind} onBack={() => setRechargeKind(null)} />
           </motion.div>
@@ -184,7 +198,7 @@ function Index() {
         )}
       </AnimatePresence>
 
-      <BottomNav active={tab} onChange={(t) => { setOverlay(null); setMoreOpt(null); setRechargeKind(null); setTab(t); }} />
+      <BottomNav active={tab} onChange={(t) => { setOverlay(null); setMoreOpt(null); setRechargeKind(null); setVoicePay(false); setSplitBill(false); setTab(t); }} />
       <Toaster position="top-center" />
     </PhoneFrame>
   );
@@ -208,6 +222,7 @@ function prettyTitle(id: MoreOptionId): string {
     verify: "Profile Verification", privacy: "Privacy Controls", notifications: "Notifications",
     theme: "Theme & Appearance", activity: "Account Activity", devices: "Manage Devices",
     "delete-account": "Delete Account", merchant: "Merchant Mode",
+    "voice-pay": "Voice Pay", "split-bill": "Split Bill",
   };
   return map[id];
 }
