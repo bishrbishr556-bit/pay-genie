@@ -17,6 +17,11 @@ import { RechargeScreen, type RechargeKind } from "@/components/payment/Recharge
 import { VoicePayScreen } from "@/components/payment/VoicePayScreen";
 import { SplitBillScreen } from "@/components/payment/SplitBillScreen";
 import type { MoreOptionId } from "@/components/payment/MoreOptionsSheet";
+
+const SETTINGS_IDS = new Set<MoreOptionId>([
+  "verify", "upi-id", "security", "change-pin", "privacy", "notifications",
+  "theme", "language", "help", "refer", "activity", "devices", "delete-account",
+]);
 import { initStore, useStore } from "@/lib/payment-store";
 import { WifiOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
