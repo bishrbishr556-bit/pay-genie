@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { actions, upiDirectory, playClick, playSuccess, vibrate, useStore } from "@/lib/payment-store";
 import { ArrowLeft, CheckCircle2, Loader2, Search, Fingerprint, Delete } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,6 +28,19 @@ export function PayScreen({ onBack, onShowReward }: { onBack: () => void; onShow
   const [pin, setPin] = useState("");
   const [pinError, setPinError] = useState(false);
   const balance = useStore((s) => s.balance);
+
+  useEffect(() => {
+    try {
+      const pref = sessionStorage.getItem("gpay-prefill-upi");
+      if (pref) {
+        sessionStorage.removeItem("gpay-prefill-upi");
+        setUpi(pref);
+        const found = upiDirectory[pref.toLowerCase()];
+        setVerifiedName(found ?? pref.split("@")[0].replace(/\b\w/g, (c) => c.toUpperCase()));
+        setStep("amount");
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   const verify = () => {
     if (!upi.includes("@")) {
