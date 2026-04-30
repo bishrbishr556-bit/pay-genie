@@ -11,8 +11,8 @@ import { ProfileScreen } from "@/components/payment/ProfileScreen";
 import { MerchantScreen } from "@/components/payment/MerchantScreen";
 import { ScannerScreen } from "@/components/payment/ScannerScreen";
 import { LockScreen } from "@/components/payment/LockScreen";
-import { StubScreen } from "@/components/payment/StubScreen";
 import { SettingsDetailScreen } from "@/components/payment/SettingsDetailScreen";
+import { FeatureScreen } from "@/components/payment/FeatureScreen";
 import { RechargeScreen, type RechargeKind } from "@/components/payment/RechargeScreen";
 import { VoicePayScreen } from "@/components/payment/VoicePayScreen";
 import { SplitBillScreen } from "@/components/payment/SplitBillScreen";
@@ -168,11 +168,7 @@ function Index() {
             {SETTINGS_IDS.has(moreOpt) ? (
               <SettingsDetailScreen id={moreOpt} onBack={() => setMoreOpt(null)} />
             ) : (
-              <StubScreen
-                title={prettyTitle(moreOpt)}
-                subtitle="Secure · Instant · Verified"
-                onBack={() => setMoreOpt(null)}
-              />
+              <FeatureScreen id={moreOpt} onBack={() => setMoreOpt(null)} />
             )}
           </motion.div>
         ) : overlay === "merchant" ? (
