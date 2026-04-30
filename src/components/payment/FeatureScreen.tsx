@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Download, Share2, CheckCircle2, Loader2, Copy, Plus, Sparkles, TrendingUp, Bell, Tag, Gift, ArrowLeftRight, MapPin, Film, CalendarDays, BadgePercent, HeartHandshake, RefreshCw, ShieldPlus, Ticket, Receipt, WifiOff, Headphones } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import QRCode from "qrcode";
@@ -678,7 +678,7 @@ function QrGenBody() {
   );
 }
 
-type Spec = { title: string; subtitle?: string; accent?: string; body: () => JSX.Element };
+type Spec = { title: string; subtitle?: string; accent?: string; body: () => React.ReactElement };
 
 const REGISTRY: Partial<Record<MoreOptionId, Spec>> = {
   request:        { title: "Request Money", subtitle: "Ask anyone to pay you instantly", accent: "from-emerald-500 to-teal-600", body: () => <RequestMoneyBody /> },
