@@ -12,10 +12,16 @@ import { MerchantScreen } from "@/components/payment/MerchantScreen";
 import { ScannerScreen } from "@/components/payment/ScannerScreen";
 import { LockScreen } from "@/components/payment/LockScreen";
 import { StubScreen } from "@/components/payment/StubScreen";
+import { SettingsDetailScreen } from "@/components/payment/SettingsDetailScreen";
 import { RechargeScreen, type RechargeKind } from "@/components/payment/RechargeScreen";
 import { VoicePayScreen } from "@/components/payment/VoicePayScreen";
 import { SplitBillScreen } from "@/components/payment/SplitBillScreen";
 import type { MoreOptionId } from "@/components/payment/MoreOptionsSheet";
+
+const SETTINGS_IDS = new Set<MoreOptionId>([
+  "verify", "upi-id", "security", "change-pin", "privacy", "notifications",
+  "theme", "language", "help", "refer", "activity", "devices", "delete-account",
+]);
 import { initStore, useStore } from "@/lib/payment-store";
 import { WifiOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -159,11 +165,15 @@ function Index() {
           </motion.div>
         ) : moreOpt ? (
           <motion.div key={`mo-${moreOpt}`} initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-20">
-            <StubScreen
-              title={prettyTitle(moreOpt)}
-              subtitle="Secure · Instant · Verified"
-              onBack={() => setMoreOpt(null)}
-            />
+            {SETTINGS_IDS.has(moreOpt) ? (
+              <SettingsDetailScreen id={moreOpt} onBack={() => setMoreOpt(null)} />
+            ) : (
+              <StubScreen
+                title={prettyTitle(moreOpt)}
+                subtitle="Secure · Instant · Verified"
+                onBack={() => setMoreOpt(null)}
+              />
+            )}
           </motion.div>
         ) : overlay === "merchant" ? (
           <motion.div key="m" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-20">
@@ -171,7 +181,14 @@ function Index() {
           </motion.div>
         ) : overlay === "scanner" ? (
           <motion.div key="s" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-20">
-            <ScannerScreen onBack={() => setOverlay(null)} onScanned={(_upi) => { setOverlay(null); setTab("pay"); }} />
+            <ScannerScreen
+              onBack={() => setOverlay(null)}
+              onScanned={(upi) => {
+                try { sessionStorage.setItem("gpay-prefill-upi", upi); } catch { /* ignore */ }
+                setOverlay(null);
+                setTab("pay");
+              }}
+            />
           </motion.div>
         ) : (
           <motion.div key={tab} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }} className="absolute inset-0">
