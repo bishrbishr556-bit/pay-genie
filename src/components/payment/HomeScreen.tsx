@@ -236,6 +236,10 @@ export function HomeScreen({
           <GameTile emoji="👆" label="Tap"      color="from-sky-600 to-blue-700"       onClick={onOpenGames} />
           <GameTile emoji="🎲" label="Dice"     color="from-amber-600 to-orange-700"   onClick={onOpenGames} />
           <GameTile emoji="🧠" label="Memory"   color="from-emerald-600 to-teal-700"   onClick={onOpenGames} />
+          <GameTile emoji="🫧" label="Bubble"   color="from-pink-500 to-fuchsia-700"   onClick={onOpenGames} />
+          <GameTile emoji="🗝️" label="Treasure" color="from-amber-600 to-yellow-700"   onClick={onOpenGames} />
+          <GameTile emoji="🍉" label="Fruit"    color="from-lime-500 to-green-700"     onClick={onOpenGames} />
+          <GameTile emoji="🚀" label="Rocket"   color="from-indigo-600 to-purple-800"  onClick={onOpenGames} />
         </div>
       </div>
 
