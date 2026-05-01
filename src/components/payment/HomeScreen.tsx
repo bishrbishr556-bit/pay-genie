@@ -21,7 +21,7 @@ const NOTIF = [
 ];
 
 export function HomeScreen({
-  onNavigate, online, onInstall, canInstall, onPickMore, onOpenGames,
+  onNavigate, online, onInstall, canInstall, onPickMore, onOpenGames, onOpenAll,
 }: {
   onNavigate: (t: NavTarget) => void;
   online: boolean;
@@ -29,6 +29,7 @@ export function HomeScreen({
   canInstall: boolean;
   onPickMore: (id: MoreOptionId) => void;
   onOpenGames: () => void;
+  onOpenAll?: () => void;
 }) {
   const balance = useStore((s) => s.balance);
   const cashback = useStore((s) => s.cashback);
@@ -347,7 +348,12 @@ export function HomeScreen({
         </div>
       </div>
 
-      <MoreOptionsSheet open={showMore} onClose={() => setShowMore(false)} onPick={(id) => { setShowMore(false); onPickMore(id); }} />
+      <MoreOptionsSheet
+        open={showMore}
+        onClose={() => setShowMore(false)}
+        onPick={(id) => { setShowMore(false); onPickMore(id); }}
+        onOpenAll={onOpenAll ? () => { setShowMore(false); onOpenAll(); } : undefined}
+      />
     </div>
   );
 }
