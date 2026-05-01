@@ -6,7 +6,8 @@ import { toast } from "sonner";
 
 export type GameId =
   | "spin" | "scratch" | "quiz" | "lucky-box"
-  | "card-flip" | "tap-earn" | "dice" | "memory";
+  | "card-flip" | "tap-earn" | "dice" | "memory"
+  | "bubble" | "treasure" | "fruit" | "rocket";
 
 const GAMES: { id: GameId; title: string; sub: string; cta: string; color: string; emoji: string }[] = [
   { id: "spin",      title: "SPIN WHEEL",   sub: "Win up to ₹1000",  cta: "Play Now", color: "from-purple-600 to-violet-700", emoji: "🎡" },
@@ -17,6 +18,10 @@ const GAMES: { id: GameId; title: string; sub: string; cta: string; color: strin
   { id: "tap-earn",  title: "TAP & EARN",   sub: "Tap More, Earn More", cta: "Play Now", color: "from-sky-600 to-blue-700",   emoji: "👆" },
   { id: "dice",      title: "DICE ROLL",    sub: "Roll Dice, Win Big", cta: "Play Now", color: "from-amber-600 to-orange-700", emoji: "🎲" },
   { id: "memory",    title: "MEMORY GAME",  sub: "Match & Win",      cta: "Play Now", color: "from-emerald-600 to-teal-700",  emoji: "🧠" },
+  { id: "bubble",    title: "BUBBLE SHOOTER",sub: "Shoot & Win",     cta: "Play Now", color: "from-pink-500 to-fuchsia-700",  emoji: "🫧" },
+  { id: "treasure",  title: "TREASURE HUNT",sub: "Find & Win",       cta: "Play Now", color: "from-amber-600 to-yellow-700",  emoji: "🗝️" },
+  { id: "fruit",     title: "FRUIT CHOP",   sub: "Chop & Win",       cta: "Play Now", color: "from-lime-500 to-green-700",    emoji: "🍉" },
+  { id: "rocket",    title: "ROCKET FLY",   sub: "Fly & Win",        cta: "Play Now", color: "from-indigo-600 to-purple-800", emoji: "🚀" },
 ];
 
 export function GamesScreen({ onBack }: { onBack: () => void }) {
@@ -101,6 +106,10 @@ function GameModal({ id, onClose, onAward }: { id: GameId; onClose: () => void; 
           {id === "tap-earn" && <TapEarnGame onAward={onAward} />}
           {id === "dice" && <DiceGame onAward={onAward} />}
           {id === "memory" && <MemoryGame onAward={onAward} />}
+          {id === "bubble" && <BubbleShooterGame onAward={onAward} />}
+          {id === "treasure" && <TreasureHuntGame onAward={onAward} />}
+          {id === "fruit" && <FruitChopGame onAward={onAward} />}
+          {id === "rocket" && <RocketFlyGame onAward={onAward} />}
         </div>
       </motion.div>
     </motion.div>
