@@ -17,7 +17,10 @@ import { RechargeScreen, type RechargeKind } from "@/components/payment/Recharge
 import { VoicePayScreen } from "@/components/payment/VoicePayScreen";
 import { SplitBillScreen } from "@/components/payment/SplitBillScreen";
 import { GamesScreen } from "@/components/payment/GamesScreen";
+import { AllServicesScreen } from "@/components/payment/AllServicesScreen";
 import type { MoreOptionId } from "@/components/payment/MoreOptionsSheet";
+import { actions } from "@/lib/payment-store";
+import { toast } from "sonner";
 
 const SETTINGS_IDS = new Set<MoreOptionId>([
   "verify", "upi-id", "security", "change-pin", "privacy", "notifications",
@@ -52,6 +55,7 @@ function Index() {
   const [voicePay, setVoicePay] = useState(false);
   const [splitBill, setSplitBill] = useState(false);
   const [games, setGames] = useState(false);
+  const [allServices, setAllServices] = useState(false);
   const [online, setOnline] = useState(true);
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [openRewardId, setOpenRewardId] = useState<string | null>(null);
@@ -124,6 +128,23 @@ function Index() {
     }
     if (id === "recharge") { setRechargeKind("mobile"); return; }
     if (id === "bills")    { setRechargeKind("electric"); return; }
+    if (id === "dth")      { setRechargeKind("dth"); return; }
+    if (id === "water")    { setRechargeKind("water"); return; }
+    if (id === "gas")      { setRechargeKind("gas"); return; }
+    if (id === "landline") { setRechargeKind("landline"); return; }
+    if (id === "broadband"){ setRechargeKind("broadband"); return; }
+    if (id === "cylinder") { setRechargeKind("cylinder"); return; }
+    if (id === "tax")      { setRechargeKind("tax"); return; }
+    if (id === "municipal"){ setRechargeKind("municipal"); return; }
+    if (id === "fastag")   { setRechargeKind("fastag"); return; }
+    if (id === "google-play") { setRechargeKind("googleplay"); return; }
+    if (id === "cc-payment")  { setRechargeKind("ccpayment"); return; }
+    if (id === "pay-contact") { setOverlay(null); setTab("pay"); return; }
+    if (id === "logout") {
+      actions.lock();
+      toast.success("Logged out");
+      return;
+    }
     if (id === "merchant") { setOverlay("merchant"); return; }
     if (id === "voice-pay") { setVoicePay(true); return; }
     if (id === "split-bill") { setSplitBill(true); return; }
@@ -155,7 +176,11 @@ function Index() {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
-        {games ? (
+        {allServices ? (
+          <motion.div key="all" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <AllServicesScreen onBack={() => setAllServices(false)} onPick={(id) => { setAllServices(false); onPickMore(id); }} />
+          </motion.div>
+        ) : games ? (
           <motion.div key="games" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-20">
             <GamesScreen onBack={() => setGames(false)} />
           </motion.div>
@@ -204,6 +229,7 @@ function Index() {
                 canInstall={!!installEvent}
                 onPickMore={onPickMore}
                 onOpenGames={openGames}
+                onOpenAll={() => setAllServices(true)}
               />
             )}
             {tab === "pay" && <PayScreen onBack={() => setTab("home")} onShowReward={(id) => { setOpenRewardId(id); setTab("rewards"); }} />}
@@ -220,33 +246,10 @@ function Index() {
         )}
       </AnimatePresence>
 
-      <BottomNav active={tab} onChange={(t) => { setOverlay(null); setMoreOpt(null); setRechargeKind(null); setVoicePay(false); setSplitBill(false); setGames(false); setTab(t); }} />
+      <BottomNav active={tab} onChange={(t) => { setOverlay(null); setMoreOpt(null); setRechargeKind(null); setVoicePay(false); setSplitBill(false); setGames(false); setAllServices(false); setTab(t); }} />
       <Toaster position="top-center" />
     </PhoneFrame>
   );
-}
-
-function prettyTitle(id: MoreOptionId): string {
-  const map: Record<MoreOptionId, string> = {
-    send: "Send Money", request: "Request Money", scan: "Scan QR", recharge: "Mobile Recharge",
-    bills: "Pay Bills", "bank-transfer": "Bank Transfer", "upi-id": "UPI ID", self: "Self Transfer",
-    approve: "Approve to Pay", intl: "International Transfer",
-    spin: "Spin Wheel", scratch: "Scratch Cards", mystery: "Mystery Box", play: "Play & Earn", wallet: "Rewards Wallet",
-    history: "Transaction History", receipt: "Download Receipt", analytics: "Analytics Dashboard", spending: "Spending Summary", statement: "Monthly Statement",
-    "add-bank": "Add Bank Account", cards: "Manage Cards", "change-pin": "Change PIN", security: "Security Settings", account: "Account Details",
-    soundbox: "Sound Box", offline: "Offline Payment", offers: "Offers", refer: "Refer & Earn", invite: "Invite Friends",
-    settings: "Settings", dark: "Dark Mode", language: "Language", help: "Help & Support", about: "About Us",
-    voucher: "Voucher Wallet", "upi-lite": "UPI Lite", autopay: "AutoPay", insurance: "Insurance",
-    gold: "Gold & Silver", "mutual-funds": "Mutual Funds", "credit-score": "Credit Score",
-    "loan-offers": "Loan Offers", donations: "Donations",
-    travel: "Travel Bookings", movies: "Movie Tickets", events: "Event Bookings",
-    emi: "EMI Calculator", currency: "Currency Converter", nearby: "Nearby Stores",
-    verify: "Profile Verification", privacy: "Privacy Controls", notifications: "Notifications",
-    theme: "Theme & Appearance", activity: "Account Activity", devices: "Manage Devices",
-    "delete-account": "Delete Account", merchant: "Merchant Mode",
-    "voice-pay": "Voice Pay", "split-bill": "Split Bill",
-  };
-  return map[id];
 }
 
 // satisfy unused warning
