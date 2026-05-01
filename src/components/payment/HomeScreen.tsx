@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useStore, playClick, vibrate } from "@/lib/payment-store";
 import {
-  Bell, Wifi, WifiOff, QrCode, Send, Smartphone, Zap, Tv, Droplet, Gift,
+  Bell, Wifi, WifiOff, QrCode, Send, Smartphone, Zap, Tv, Droplet,
   TrendingUp, Store, Volume2, MoreHorizontal, Eye, EyeOff, Plus, History,
   FileDown, Sparkles, Flame, Users, ChevronRight, Gamepad2, CircleDot,
-  Ticket, Coins, ShieldCheck, BarChart3, Bot, Mic, Receipt,
+  ShieldCheck, BarChart3, Bot, Mic, Receipt,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Tab } from "./BottomNav";
@@ -376,17 +376,6 @@ function QuickAction({ icon: Icon, label, color, onClick }: { icon: LucideIcon; 
         <Icon className="h-5 w-5" />
       </div>
       <span className="text-[11px] font-medium text-foreground">{label}</span>
-    </button>
-  );
-}
-
-function GameCard({ icon: Icon, label, color, onClick }: { icon: LucideIcon; label: string; color: string; onClick?: () => void }) {
-  return (
-    <button onClick={() => { playClick(); vibrate(15); onClick?.(); }}
-      className={`shrink-0 w-24 rounded-2xl p-3 text-white text-left bg-gradient-to-br ${color} active:scale-95 transition-transform shadow-md`}>
-      <Icon className="h-6 w-6 mb-2" />
-      <p className="text-xs font-bold leading-tight">{label}</p>
-      <p className="text-[10px] opacity-80 mt-0.5">Tap to play</p>
     </button>
   );
 }
