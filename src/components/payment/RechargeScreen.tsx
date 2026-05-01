@@ -1,17 +1,29 @@
 import { useState } from "react";
-import { ArrowLeft, Smartphone, Zap, Tv, Droplet, CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowLeft, Smartphone, Zap, Tv, Droplet, CheckCircle2, Loader2, Flame, PhoneCall, Wifi, Cylinder, Landmark, Building2, Car, PlayCircle, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { actions, playClick, playSuccess, vibrate } from "@/lib/payment-store";
 import { toast } from "sonner";
 import type { LucideIcon } from "lucide-react";
 
-export type RechargeKind = "mobile" | "electric" | "dth" | "water";
+export type RechargeKind =
+  | "mobile" | "electric" | "dth" | "water"
+  | "gas" | "landline" | "broadband" | "cylinder"
+  | "tax" | "municipal" | "fastag" | "googleplay" | "ccpayment";
 
 const META: Record<RechargeKind, { title: string; icon: LucideIcon; accent: string; field: string; placeholder: string; ops: string[] }> = {
   mobile:   { title: "Mobile Recharge",  icon: Smartphone, accent: "from-emerald-500 to-teal-600", field: "Mobile number",  placeholder: "Enter 10-digit mobile",  ops: ["Airtel", "Jio", "Vi", "BSNL"] },
   electric: { title: "Electricity Bill", icon: Zap,        accent: "from-amber-500 to-orange-600", field: "Consumer number",placeholder: "Enter consumer no.",     ops: ["KSEB", "Adani", "Tata Power", "BESCOM"] },
   dth:      { title: "DTH Recharge",     icon: Tv,         accent: "from-rose-500 to-pink-600",    field: "Subscriber ID",  placeholder: "Enter subscriber ID",    ops: ["Tata Play", "Airtel DTH", "Dish TV", "Sun Direct"] },
   water:    { title: "Water Bill",       icon: Droplet,    accent: "from-sky-500 to-blue-600",     field: "RR / Connection",placeholder: "Enter connection no.",   ops: ["KWA", "BWSSB", "DJB", "MCGM"] },
+  gas:      { title: "Gas Booking",      icon: Flame,      accent: "from-pink-500 to-rose-600",    field: "Consumer ID",    placeholder: "Enter consumer ID",      ops: ["Indane", "HP Gas", "Bharat Gas"] },
+  landline: { title: "Landline Bill",    icon: PhoneCall,  accent: "from-cyan-500 to-blue-600",    field: "Phone number",   placeholder: "STD + number",           ops: ["BSNL", "MTNL", "Airtel"] },
+  broadband:{ title: "Broadband Bill",   icon: Wifi,       accent: "from-blue-500 to-indigo-600",  field: "Account / Login",placeholder: "Account ID",             ops: ["Airtel Xstream", "JioFiber", "ACT", "BSNL"] },
+  cylinder: { title: "Cylinder Booking", icon: Cylinder,   accent: "from-rose-500 to-red-600",     field: "Consumer ID",    placeholder: "LPG ID",                 ops: ["Indane", "HP Gas", "Bharat Gas"] },
+  tax:      { title: "Tax Payment",      icon: Landmark,   accent: "from-emerald-500 to-green-700",field: "PAN",            placeholder: "ABCDE1234F",             ops: ["Income Tax", "Advance Tax", "TDS"] },
+  municipal:{ title: "Municipal Tax",    icon: Building2,  accent: "from-violet-500 to-purple-700",field: "Property ID",    placeholder: "PID / Khata no.",        ops: ["BBMP", "MCGM", "GHMC", "PMC"] },
+  fastag:   { title: "FASTag Recharge",  icon: Car,        accent: "from-blue-500 to-cyan-700",    field: "Vehicle number", placeholder: "KA01AB1234",             ops: ["Paytm FASTag", "ICICI", "HDFC", "SBI"] },
+  googleplay:{title: "Google Play Recharge",icon: PlayCircle,accent: "from-fuchsia-500 to-purple-700", field: "Email", placeholder: "Google account email", ops: ["₹100", "₹500", "₹1000", "Custom"] },
+  ccpayment:{ title: "Credit Card Payment", icon: CreditCard,accent: "from-orange-500 to-red-600", field: "Card number",    placeholder: "•••• •••• •••• ••••",    ops: ["HDFC", "SBI", "ICICI", "Axis", "Amex"] },
 };
 
 type Step = "form" | "processing" | "success";
