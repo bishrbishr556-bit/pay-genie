@@ -726,13 +726,140 @@ const REGISTRY: Partial<Record<MoreOptionId, Spec>> = {
   "upi-id":       { title: "My UPI QR", subtitle: "Generate & share your UPI QR", accent: "from-pink-500 to-purple-700", body: () => <QrGenBody /> },
 };
 
+/* ---------- Generic body for newly-added services ---------- */
+function GenericServiceBody({ id }: { id: string }) {
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState<string | null>(null);
+  const [amt, setAmt] = useState("");
+
+  const cfgMap: Record<string, { hint: string; placeholder: string; suggested: number[]; cta: string; success: string; field?: string }> = {
+    rewards:           { hint: "View and redeem your earned rewards.", placeholder: "Reward code (optional)", suggested: [], cta: "Open Rewards Wallet", success: "Wallet opened" },
+    coupons:           { hint: "Apply a coupon to your next payment.", placeholder: "Enter coupon code",      suggested: [], cta: "Apply Coupon",        success: "Coupon applied · 10% off" },
+    "cashback-points": { hint: "Convert points to cash · 100 pts = ₹1", placeholder: "Points to redeem",     suggested: [100, 500, 1000], cta: "Redeem", success: "Points redeemed" },
+    "vip-benefits":    { hint: "Unlock VIP perks · priority support, higher limits.", placeholder: "", suggested: [], cta: "Activate VIP", success: "VIP activated for 30 days" },
+    charity:           { hint: "Donate to a verified NGO · tax receipt provided.", placeholder: "Amount (₹)", suggested: [100, 500, 1000], cta: "Donate", success: "Thank you for your donation" },
+    education:         { hint: "Pay your school / college fees instantly.", placeholder: "Student ID",        suggested: [500, 1000, 5000], cta: "Pay Fees", success: "Fees paid" },
+    hospital:          { hint: "Pay your hospital bill securely.",         placeholder: "Bill / Patient ID", suggested: [500, 1000, 2500], cta: "Pay Bill", success: "Bill paid" },
+    flight:            { hint: "Search and book domestic / international flights.", placeholder: "From → To",  suggested: [], cta: "Search Flights", success: "Showing flights" },
+    bus:               { hint: "Book inter-city bus tickets in seconds.", placeholder: "From → To",          suggested: [], cta: "Search Buses",   success: "Showing buses" },
+    hotel:             { hint: "Book hotels with instant confirmation.",  placeholder: "City / Hotel name",  suggested: [], cta: "Search Hotels",  success: "Showing hotels" },
+    biometric:         { hint: "Use Face ID / Fingerprint to unlock the app.", placeholder: "", suggested: [], cta: "Enable Biometric", success: "Biometric enabled" },
+    feedback:          { hint: "Tell us how to improve. We read everything.", placeholder: "Your feedback…", suggested: [], cta: "Submit Feedback", success: "Thanks for your feedback" },
+    "check-balance":   { hint: "Securely fetch balance from your linked bank.", placeholder: "", suggested: [], cta: "Check Balance",     success: "Balance: ₹25,840.00" },
+    "bank-statement":  { hint: "Download statement for the last 6 months.",     placeholder: "", suggested: [], cta: "Download Statement", success: "Statement downloaded" },
+    "debit-card":      { hint: "Block, freeze or set limits on your debit card.", placeholder: "Card last 4 digits", suggested: [], cta: "Manage Card", success: "Card preferences saved" },
+    "fixed-deposit":   { hint: "Open an FD at up to 7.5% p.a.",                  placeholder: "Amount (₹)", suggested: [10000, 25000, 50000], cta: "Open FD", success: "FD booked" },
+    "recurring-deposit":{hint: "Start a Recurring Deposit · monthly auto-debit.", placeholder: "Monthly ₹", suggested: [500, 1000, 2500], cta: "Start RD", success: "RD started" },
+    "gold-investment": { hint: "Buy 24K digital gold from ₹10.",                 placeholder: "Amount (₹)", suggested: [100, 500, 1000], cta: "Buy Gold", success: "Gold purchased" },
+    "loan-repayment":  { hint: "Pay your EMI for active loans.",                 placeholder: "Loan account no.", suggested: [1000, 5000, 10000], cta: "Pay EMI", success: "EMI paid" },
+    "pay-contact":     { hint: "Pay any saved contact instantly.",               placeholder: "Search contact…", suggested: [], cta: "Open Contacts", success: "Opening contacts" },
+  };
+
+  const cfg = cfgMap[id] ?? { hint: "Continue securely.", placeholder: "", suggested: [], cta: "Continue", success: "Done" };
+  const [text, setText] = useState("");
+
+  const submit = () => {
+    setBusy(true);
+    setTimeout(() => {
+      setBusy(false);
+      setDone(cfg.success);
+      playSuccess(); vibrate([40, 30, 60]);
+      toast.success(cfg.success);
+    }, 1400);
+  };
+
+  if (done) return (
+    <Card className="text-center py-6">
+      <CheckCircle2 className="h-14 w-14 text-emerald-500 mx-auto mb-2" />
+      <p className="font-bold text-lg">{done}</p>
+      <p className="text-xs text-muted-foreground mt-1">Reference · {Math.random().toString(36).slice(2, 10).toUpperCase()}</p>
+      <button onClick={() => { setDone(null); setText(""); setAmt(""); }} className="mt-4 text-sm font-semibold text-primary">Do another</button>
+    </Card>
+  );
+
+  if (busy) return (
+    <Card className="text-center py-8">
+      <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-3" />
+      <p className="font-semibold">Processing securely…</p>
+      <p className="text-xs text-muted-foreground mt-1">256-bit encryption · Verified</p>
+    </Card>
+  );
+
+  return (
+    <Card className="space-y-4">
+      <p className="text-sm text-muted-foreground">{cfg.hint}</p>
+      {cfg.placeholder && (
+        <input
+          value={text} onChange={(e) => setText(e.target.value)}
+          placeholder={cfg.placeholder}
+          className="w-full px-3 py-2.5 bg-muted rounded-xl outline-none focus:ring-2 ring-primary text-sm"
+        />
+      )}
+      {cfg.suggested.length > 0 && (
+        <div>
+          <label className="text-xs text-muted-foreground">Amount (₹)</label>
+          <input
+            value={amt} onChange={(e) => setAmt(e.target.value.replace(/\D/g, ""))} inputMode="numeric"
+            placeholder="0"
+            className="w-full mt-1 px-3 py-3 bg-muted rounded-xl text-2xl font-bold outline-none"
+          />
+          <div className="flex gap-2 mt-2 flex-wrap">
+            {cfg.suggested.map((v) => (
+              <button key={v} onClick={() => setAmt(String(v))}
+                className="px-3 py-1.5 rounded-full bg-muted text-xs font-semibold border border-border active:scale-95 transition-transform">
+                ₹{v}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      <PrimaryBtn onClick={submit}>{cfg.cta}</PrimaryBtn>
+      <div className="flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
+        <ShieldPlus className="h-3 w-3" /> Secured · Verified · Instant
+      </div>
+    </Card>
+  );
+}
+
+const ACCENT_BY_ID: Record<string, { title: string; subtitle: string; accent: string }> = {
+  rewards:           { title: "Rewards",         subtitle: "Earn and redeem rewards",    accent: "from-orange-500 to-red-600" },
+  coupons:           { title: "Coupons",         subtitle: "Save more on every payment", accent: "from-pink-500 to-rose-700" },
+  "cashback-points": { title: "Cashback Points", subtitle: "Redeem points for cash",     accent: "from-amber-500 to-orange-700" },
+  "vip-benefits":    { title: "VIP Benefits",    subtitle: "Premium perks & priority",   accent: "from-violet-600 to-purple-800" },
+  charity:           { title: "Charity",         subtitle: "Verified NGOs · 80G receipt",accent: "from-blue-500 to-cyan-700" },
+  education:         { title: "Education Fees",  subtitle: "Schools · Colleges · Coaching", accent: "from-blue-600 to-indigo-700" },
+  hospital:          { title: "Hospital Bills",  subtitle: "Pay your hospital safely",   accent: "from-violet-500 to-purple-700" },
+  flight:            { title: "Flight Booking",  subtitle: "Domestic & international",   accent: "from-emerald-500 to-green-700" },
+  bus:               { title: "Bus Booking",     subtitle: "Inter-city buses",           accent: "from-pink-500 to-rose-700" },
+  hotel:             { title: "Hotel Booking",   subtitle: "Best deals on hotels",       accent: "from-teal-500 to-cyan-700" },
+  biometric:         { title: "Biometric Settings", subtitle: "Face ID / Fingerprint",   accent: "from-emerald-500 to-teal-700" },
+  feedback:          { title: "Feedback",        subtitle: "Help us improve",            accent: "from-orange-500 to-red-600" },
+  "check-balance":   { title: "Check Bank Balance", subtitle: "Real-time bank balance", accent: "from-emerald-500 to-teal-700" },
+  "bank-statement":  { title: "Bank Statement",  subtitle: "Download your statement",    accent: "from-blue-500 to-indigo-700" },
+  "debit-card":      { title: "Debit Card Services", subtitle: "Manage your debit card",accent: "from-violet-500 to-purple-700" },
+  "fixed-deposit":   { title: "Fixed Deposit",   subtitle: "Up to 7.5% p.a.",            accent: "from-blue-600 to-sky-700" },
+  "recurring-deposit":{title: "Recurring Deposit",subtitle: "Start saving monthly",      accent: "from-pink-500 to-rose-700" },
+  "gold-investment": { title: "Gold Investment", subtitle: "Buy 24K digital gold",       accent: "from-amber-500 to-yellow-700" },
+  "loan-repayment":  { title: "Loan Repayment",  subtitle: "Pay your loan EMI",          accent: "from-violet-500 to-purple-700" },
+  "pay-contact":     { title: "Pay Contact",     subtitle: "Pay any saved contact",      accent: "from-orange-500 to-amber-700" },
+};
+
 export function FeatureScreen({ id, onBack }: { id: MoreOptionId; onBack: () => void }) {
   const spec = REGISTRY[id];
   if (!spec) {
+    const meta = ACCENT_BY_ID[id];
+    if (meta) {
+      return (
+        <div className="h-full flex flex-col bg-background">
+          <Header title={meta.title} subtitle={meta.subtitle} onBack={onBack} accent={meta.accent} />
+          <div className="flex-1 overflow-y-auto px-5 py-5 pb-24"><GenericServiceBody id={id} /></div>
+        </div>
+      );
+    }
     return (
       <div className="h-full flex flex-col bg-background">
         <Header title={prettyDefault(id)} subtitle="Secure · Instant · Verified" onBack={onBack} />
-        <div className="flex-1 overflow-y-auto px-5 py-5 pb-24"><QrGenBody /></div>
+        <div className="flex-1 overflow-y-auto px-5 py-5 pb-24"><GenericServiceBody id={id} /></div>
       </div>
     );
   }

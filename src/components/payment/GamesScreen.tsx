@@ -6,7 +6,8 @@ import { toast } from "sonner";
 
 export type GameId =
   | "spin" | "scratch" | "quiz" | "lucky-box"
-  | "card-flip" | "tap-earn" | "dice" | "memory";
+  | "card-flip" | "tap-earn" | "dice" | "memory"
+  | "bubble" | "treasure" | "fruit" | "rocket";
 
 const GAMES: { id: GameId; title: string; sub: string; cta: string; color: string; emoji: string }[] = [
   { id: "spin",      title: "SPIN WHEEL",   sub: "Win up to ₹1000",  cta: "Play Now", color: "from-purple-600 to-violet-700", emoji: "🎡" },
@@ -17,6 +18,10 @@ const GAMES: { id: GameId; title: string; sub: string; cta: string; color: strin
   { id: "tap-earn",  title: "TAP & EARN",   sub: "Tap More, Earn More", cta: "Play Now", color: "from-sky-600 to-blue-700",   emoji: "👆" },
   { id: "dice",      title: "DICE ROLL",    sub: "Roll Dice, Win Big", cta: "Play Now", color: "from-amber-600 to-orange-700", emoji: "🎲" },
   { id: "memory",    title: "MEMORY GAME",  sub: "Match & Win",      cta: "Play Now", color: "from-emerald-600 to-teal-700",  emoji: "🧠" },
+  { id: "bubble",    title: "BUBBLE SHOOTER",sub: "Shoot & Win",     cta: "Play Now", color: "from-pink-500 to-fuchsia-700",  emoji: "🫧" },
+  { id: "treasure",  title: "TREASURE HUNT",sub: "Find & Win",       cta: "Play Now", color: "from-amber-600 to-yellow-700",  emoji: "🗝️" },
+  { id: "fruit",     title: "FRUIT CHOP",   sub: "Chop & Win",       cta: "Play Now", color: "from-lime-500 to-green-700",    emoji: "🍉" },
+  { id: "rocket",    title: "ROCKET FLY",   sub: "Fly & Win",        cta: "Play Now", color: "from-indigo-600 to-purple-800", emoji: "🚀" },
 ];
 
 export function GamesScreen({ onBack }: { onBack: () => void }) {
@@ -101,6 +106,10 @@ function GameModal({ id, onClose, onAward }: { id: GameId; onClose: () => void; 
           {id === "tap-earn" && <TapEarnGame onAward={onAward} />}
           {id === "dice" && <DiceGame onAward={onAward} />}
           {id === "memory" && <MemoryGame onAward={onAward} />}
+          {id === "bubble" && <BubbleShooterGame onAward={onAward} />}
+          {id === "treasure" && <TreasureHuntGame onAward={onAward} />}
+          {id === "fruit" && <FruitChopGame onAward={onAward} />}
+          {id === "rocket" && <RocketFlyGame onAward={onAward} />}
         </div>
       </motion.div>
     </motion.div>
@@ -441,6 +450,276 @@ function MemoryGame({ onAward }: { onAward: (n: number) => void }) {
       <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mt-3">
         <Coins className="h-3 w-3" /> Fewer moves = bigger reward
       </div>
+    </div>
+  );
+}
+
+/* ---------- New games ---------- */
+
+function BubbleShooterGame({ onAward }: { onAward: (n: number) => void }) {
+  const [bubbles, setBubbles] = useState<{ id: number; x: number; y: number; v: number; color: string }[]>([]);
+  const [score, setScore] = useState(0);
+  const [time, setTime] = useState(15);
+  const [running, setRunning] = useState(false);
+  const idRef = useRef(0);
+
+  useEffect(() => {
+    if (!running) return;
+    if (time <= 0) { setRunning(false); onAward(Math.min(150, score * 5)); return; }
+    const t = setTimeout(() => setTime((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [running, time, score, onAward]);
+
+  useEffect(() => {
+    if (!running) return;
+    const spawn = setInterval(() => {
+      const colors = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#a855f7", "#ec4899"];
+      idRef.current++;
+      setBubbles((bs) => [...bs, {
+        id: idRef.current,
+        x: 10 + Math.random() * 75,
+        y: 100,
+        v: 0.6 + Math.random() * 0.6,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      }].slice(-12));
+    }, 600);
+    const move = setInterval(() => {
+      setBubbles((bs) => bs.map((b) => ({ ...b, y: b.y - b.v })).filter((b) => b.y > -10));
+    }, 30);
+    return () => { clearInterval(spawn); clearInterval(move); };
+  }, [running]);
+
+  const pop = (id: number) => {
+    setBubbles((bs) => bs.filter((b) => b.id !== id));
+    setScore((s) => s + 1);
+    playTick(); vibrate(8);
+  };
+
+  const start = () => { setBubbles([]); setScore(0); setTime(15); setRunning(true); };
+
+  return (
+    <div className="text-center">
+      <div className="flex justify-around mb-2 text-sm">
+        <div><p className="text-xs text-muted-foreground">Time</p><p className="font-bold">{time}s</p></div>
+        <div><p className="text-xs text-muted-foreground">Popped</p><p className="font-bold">{score}</p></div>
+      </div>
+      <div className="relative h-72 bg-gradient-to-b from-sky-100 to-sky-300 dark:from-sky-900 dark:to-sky-700 rounded-2xl overflow-hidden">
+        {bubbles.map((b) => (
+          <button
+            key={b.id}
+            onClick={() => pop(b.id)}
+            className="absolute h-9 w-9 rounded-full shadow-lg active:scale-90 transition-transform"
+            style={{ left: `${b.x}%`, bottom: `${b.y}%`, background: `radial-gradient(circle at 30% 30%, white, ${b.color})` }}
+          />
+        ))}
+        {!running && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <button onClick={start} className="gradient-primary text-primary-foreground font-bold px-6 py-3 rounded-xl">
+              {score > 0 ? "Play Again" : "Start 🫧"}
+            </button>
+          </div>
+        )}
+      </div>
+      <p className="text-[11px] text-muted-foreground mt-2">Pop bubbles · Each = ₹5 (max ₹150)</p>
+    </div>
+  );
+}
+
+function TreasureHuntGame({ onAward }: { onAward: (n: number) => void }) {
+  const grid = useMemo(() => {
+    const cells = Array.from({ length: 9 }, () => 0);
+    const treasureIdx = Math.floor(Math.random() * 9);
+    const decoyIdx = Math.floor(Math.random() * 9);
+    cells[treasureIdx] = 100;
+    if (decoyIdx !== treasureIdx) cells[decoyIdx] = 25;
+    return cells.map((v) => ({ value: v, opened: false }));
+  }, []);
+  const [state, setState] = useState(grid);
+  const [moves, setMoves] = useState(3);
+  const [done, setDone] = useState(false);
+
+  const dig = (i: number) => {
+    if (done || state[i].opened || moves <= 0) return;
+    const next = state.map((c, j) => j === i ? { ...c, opened: true } : c);
+    setState(next);
+    const m = moves - 1;
+    setMoves(m);
+    if (next[i].value > 0) {
+      setDone(true); onAward(next[i].value);
+    } else if (m === 0) {
+      setDone(true); onAward(0);
+    } else {
+      playTick(); vibrate(10);
+    }
+  };
+
+  return (
+    <div>
+      <p className="text-center text-xs text-muted-foreground mb-2">3 digs · Find the treasure 🗝️</p>
+      <div className="grid grid-cols-3 gap-2">
+        {state.map((c, i) => (
+          <button key={i} onClick={() => dig(i)} disabled={c.opened || done}
+            className={`aspect-square rounded-xl text-3xl flex items-center justify-center shadow active:scale-95 transition-transform ${
+              c.opened
+                ? c.value === 100 ? "bg-gradient-to-br from-amber-400 to-yellow-600 text-white"
+                : c.value === 25 ? "bg-gradient-to-br from-emerald-500 to-green-600 text-white"
+                : "bg-muted text-muted-foreground"
+                : "bg-gradient-to-br from-amber-700 to-amber-900 text-white"
+            }`}>
+            {c.opened ? (c.value === 100 ? "💎" : c.value === 25 ? `₹${c.value}` : "⛏️") : "🟫"}
+          </button>
+        ))}
+      </div>
+      <p className="text-center text-xs text-muted-foreground mt-3">Digs left: <b>{moves}</b></p>
+    </div>
+  );
+}
+
+function FruitChopGame({ onAward }: { onAward: (n: number) => void }) {
+  const [items, setItems] = useState<{ id: number; x: number; y: number; emoji: string; bomb: boolean }[]>([]);
+  const [score, setScore] = useState(0);
+  const [time, setTime] = useState(20);
+  const [running, setRunning] = useState(false);
+  const [over, setOver] = useState(false);
+  const idRef = useRef(0);
+
+  useEffect(() => {
+    if (!running) return;
+    if (time <= 0) { setRunning(false); setOver(true); onAward(Math.min(200, score * 4)); return; }
+    const t = setTimeout(() => setTime((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [running, time, score, onAward]);
+
+  useEffect(() => {
+    if (!running) return;
+    const fruits = ["🍉", "🍎", "🍊", "🍋", "🍇", "🥝", "🍓"];
+    const spawn = setInterval(() => {
+      idRef.current++;
+      const isBomb = Math.random() < 0.18;
+      setItems((it) => [...it, {
+        id: idRef.current,
+        x: 5 + Math.random() * 80,
+        y: 0,
+        emoji: isBomb ? "💣" : fruits[Math.floor(Math.random() * fruits.length)],
+        bomb: isBomb,
+      }].slice(-10));
+    }, 700);
+    const move = setInterval(() => {
+      setItems((it) => it.map((b) => ({ ...b, y: b.y + 2 })).filter((b) => b.y < 100));
+    }, 30);
+    return () => { clearInterval(spawn); clearInterval(move); };
+  }, [running]);
+
+  const chop = (id: number, bomb: boolean) => {
+    setItems((it) => it.filter((b) => b.id !== id));
+    if (bomb) {
+      vibrate([60, 40, 60]);
+      setRunning(false); setOver(true);
+      onAward(Math.min(200, score * 4));
+      return;
+    }
+    setScore((s) => s + 1); playTick(); vibrate(8);
+  };
+
+  const start = () => { setItems([]); setScore(0); setTime(20); setOver(false); setRunning(true); };
+
+  return (
+    <div className="text-center">
+      <div className="flex justify-around mb-2 text-sm">
+        <div><p className="text-xs text-muted-foreground">Time</p><p className="font-bold">{time}s</p></div>
+        <div><p className="text-xs text-muted-foreground">Chopped</p><p className="font-bold">{score}</p></div>
+      </div>
+      <div className="relative h-72 bg-gradient-to-b from-emerald-100 to-emerald-300 dark:from-emerald-900 dark:to-emerald-700 rounded-2xl overflow-hidden">
+        {items.map((b) => (
+          <button
+            key={b.id} onClick={() => chop(b.id, b.bomb)}
+            className="absolute text-3xl active:scale-90 transition-transform"
+            style={{ left: `${b.x}%`, top: `${b.y}%` }}
+          >{b.emoji}</button>
+        ))}
+        {!running && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 backdrop-blur-sm">
+            {over && <p className="text-white font-bold mb-2">Game over · {score} chopped</p>}
+            <button onClick={start} className="gradient-primary text-primary-foreground font-bold px-6 py-3 rounded-xl">
+              {score > 0 ? "Play Again" : "Start 🍉"}
+            </button>
+          </div>
+        )}
+      </div>
+      <p className="text-[11px] text-muted-foreground mt-2">Avoid 💣 · Each fruit = ₹4 (max ₹200)</p>
+    </div>
+  );
+}
+
+function RocketFlyGame({ onAward }: { onAward: (n: number) => void }) {
+  const [mult, setMult] = useState(1);
+  const [running, setRunning] = useState(false);
+  const [crashed, setCrashed] = useState(false);
+  const [cashed, setCashed] = useState(false);
+  const stake = 20;
+  const crashAtRef = useRef(1);
+
+  const start = () => {
+    setMult(1); setCrashed(false); setCashed(false);
+    crashAtRef.current = 1.2 + Math.random() * 5;
+    setRunning(true);
+  };
+
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => {
+      setMult((m) => {
+        const n = +(m + 0.07).toFixed(2);
+        if (n >= crashAtRef.current) {
+          clearInterval(id);
+          setRunning(false);
+          setCrashed(true);
+          vibrate([60, 40, 80]);
+          onAward(0);
+        } else {
+          if (Math.floor(n * 10) % 5 === 0) playTick();
+        }
+        return n;
+      });
+    }, 110);
+    return () => clearInterval(id);
+  }, [running, onAward]);
+
+  const cashOut = () => {
+    if (!running || cashed) return;
+    setRunning(false); setCashed(true);
+    const win = Math.floor(stake * mult);
+    onAward(win);
+  };
+
+  return (
+    <div className="text-center">
+      <div className="relative h-60 bg-gradient-to-b from-indigo-900 via-purple-900 to-black rounded-2xl overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "radial-gradient(white 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
+        <motion.div
+          animate={{ y: -Math.min(200, mult * 30), rotate: -10 }}
+          transition={{ duration: 0.1 }}
+          className="text-5xl"
+        >🚀</motion.div>
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between text-white">
+          <span className="text-xs opacity-80">Stake ₹{stake}</span>
+          <span className={`text-3xl font-extrabold ${crashed ? "text-rose-400" : "text-emerald-400"}`}>{mult.toFixed(2)}×</span>
+        </div>
+        {crashed && <div className="absolute inset-0 flex items-center justify-center text-rose-400 font-bold text-xl">💥 Crashed</div>}
+      </div>
+      <div className="grid grid-cols-2 gap-2 mt-3">
+        <button
+          onClick={start} disabled={running}
+          className="py-3 rounded-xl bg-muted font-semibold disabled:opacity-50">
+          {crashed || cashed ? "Play Again" : "Launch 🚀"}
+        </button>
+        <button
+          onClick={cashOut} disabled={!running}
+          className="py-3 rounded-xl gradient-primary text-primary-foreground font-semibold disabled:opacity-50">
+          Cash Out ₹{Math.floor(stake * mult)}
+        </button>
+      </div>
+      <p className="text-[11px] text-muted-foreground mt-2">Cash out before the rocket crashes!</p>
     </div>
   );
 }

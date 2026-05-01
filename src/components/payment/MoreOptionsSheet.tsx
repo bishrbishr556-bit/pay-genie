@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, Send, Download, QrCode, Smartphone, Receipt, Building2, AtSign, UserCheck, ShieldCheck, Globe,
+  X, Grid3x3, Send, Download, QrCode, Smartphone, Receipt, Building2, AtSign, UserCheck, ShieldCheck, Globe,
   CircleDot, Ticket, Gift, Gamepad2, Wallet, History, FileDown, BarChart3, PieChart, FileText,
   Building, CreditCard, Lock, Shield, User, Volume2, WifiOff, Tag, Users, UserPlus,
   Settings, Moon, Languages, Headphones, Info,
@@ -22,7 +22,15 @@ export type MoreOptionId =
   | "voucher" | "upi-lite" | "autopay" | "insurance" | "gold" | "mutual-funds" | "credit-score"
   | "loan-offers" | "donations" | "travel" | "movies" | "events" | "emi" | "currency" | "nearby"
   | "verify" | "privacy" | "notifications" | "theme" | "activity" | "devices" | "delete-account" | "merchant"
-  | "voice-pay" | "split-bill";
+  | "voice-pay" | "split-bill"
+  // All Services additions
+  | "pay-contact" | "dth" | "water" | "gas" | "cc-payment" | "landline" | "broadband"
+  | "cylinder" | "tax" | "municipal" | "fastag" | "google-play"
+  | "check-balance" | "bank-statement" | "debit-card" | "fixed-deposit" | "recurring-deposit"
+  | "gold-investment" | "loan-repayment"
+  | "rewards" | "coupons" | "cashback-points" | "vip-benefits"
+  | "charity" | "education" | "hospital" | "flight" | "bus" | "hotel"
+  | "biometric" | "logout" | "feedback";
 
 type Item = { id: MoreOptionId; label: string; icon: LucideIcon; color: string };
 type Section = { title: string; accent: string; items: Item[] };
@@ -137,7 +145,7 @@ const SECTIONS: Section[] = [
 
 const TOTAL = SECTIONS.reduce((n, s) => n + s.items.length, 0);
 
-export function MoreOptionsSheet({ open, onClose, onPick }: { open: boolean; onClose: () => void; onPick: (id: MoreOptionId) => void }) {
+export function MoreOptionsSheet({ open, onClose, onPick, onOpenAll }: { open: boolean; onClose: () => void; onPick: (id: MoreOptionId) => void; onOpenAll?: () => void }) {
   return (
     <AnimatePresence>
       {open && (
@@ -154,7 +162,16 @@ export function MoreOptionsSheet({ open, onClose, onPick }: { open: boolean; onC
           >
             <div className="flex items-center justify-between px-5 pt-3 pb-2 relative">
               <div className="absolute top-2 left-1/2 -translate-x-1/2 h-1 w-10 rounded-full bg-slate-700" />
-              <span className="w-9" />
+              {onOpenAll ? (
+                <button
+                  onClick={() => { playClick(); vibrate(15); onOpenAll(); }}
+                  className="flex items-center gap-1 text-xs font-semibold bg-gradient-to-r from-fuchsia-500 to-violet-600 text-white px-3 py-1.5 rounded-full active:scale-95 transition-transform"
+                >
+                  <Grid3x3 className="h-3.5 w-3.5" /> All
+                </button>
+              ) : (
+                <span className="w-9" />
+              )}
               <h2 className="text-lg font-bold">More Options</h2>
               <button
                 aria-label="Close"
