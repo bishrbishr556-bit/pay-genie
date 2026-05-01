@@ -16,6 +16,7 @@ import { FeatureScreen } from "@/components/payment/FeatureScreen";
 import { RechargeScreen, type RechargeKind } from "@/components/payment/RechargeScreen";
 import { VoicePayScreen } from "@/components/payment/VoicePayScreen";
 import { SplitBillScreen } from "@/components/payment/SplitBillScreen";
+import { GamesScreen } from "@/components/payment/GamesScreen";
 import type { MoreOptionId } from "@/components/payment/MoreOptionsSheet";
 
 const SETTINGS_IDS = new Set<MoreOptionId>([
@@ -50,6 +51,7 @@ function Index() {
   const [rechargeKind, setRechargeKind] = useState<RechargeKind | null>(null);
   const [voicePay, setVoicePay] = useState(false);
   const [splitBill, setSplitBill] = useState(false);
+  const [games, setGames] = useState(false);
   const [online, setOnline] = useState(true);
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [openRewardId, setOpenRewardId] = useState<string | null>(null);
@@ -109,6 +111,8 @@ function Index() {
     }
   };
 
+  const openGames = () => setGames(true);
+
   const onPickMore = (id: MoreOptionId) => {
     // Route to existing real flows when possible.
     if (id === "send")     { setOverlay(null); setTab("pay"); return; }
@@ -151,7 +155,11 @@ function Index() {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
-        {voicePay ? (
+        {games ? (
+          <motion.div key="games" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-20">
+            <GamesScreen onBack={() => setGames(false)} />
+          </motion.div>
+        ) : voicePay ? (
           <motion.div key="vp" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-20">
             <VoicePayScreen onBack={() => setVoicePay(false)} />
           </motion.div>
@@ -195,6 +203,7 @@ function Index() {
                 onInstall={handleInstall}
                 canInstall={!!installEvent}
                 onPickMore={onPickMore}
+                onOpenGames={openGames}
               />
             )}
             {tab === "pay" && <PayScreen onBack={() => setTab("home")} onShowReward={(id) => { setOpenRewardId(id); setTab("rewards"); }} />}
@@ -211,7 +220,7 @@ function Index() {
         )}
       </AnimatePresence>
 
-      <BottomNav active={tab} onChange={(t) => { setOverlay(null); setMoreOpt(null); setRechargeKind(null); setVoicePay(false); setSplitBill(false); setTab(t); }} />
+      <BottomNav active={tab} onChange={(t) => { setOverlay(null); setMoreOpt(null); setRechargeKind(null); setVoicePay(false); setSplitBill(false); setGames(false); setTab(t); }} />
       <Toaster position="top-center" />
     </PhoneFrame>
   );

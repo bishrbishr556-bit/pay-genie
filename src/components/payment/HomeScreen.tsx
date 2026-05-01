@@ -21,13 +21,14 @@ const NOTIF = [
 ];
 
 export function HomeScreen({
-  onNavigate, online, onInstall, canInstall, onPickMore,
+  onNavigate, online, onInstall, canInstall, onPickMore, onOpenGames,
 }: {
   onNavigate: (t: NavTarget) => void;
   online: boolean;
   onInstall: () => void;
   canInstall: boolean;
   onPickMore: (id: MoreOptionId) => void;
+  onOpenGames: () => void;
 }) {
   const balance = useStore((s) => s.balance);
   const cashback = useStore((s) => s.cashback);
@@ -224,13 +225,17 @@ export function HomeScreen({
       <div className="px-5 mt-5">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-sm font-semibold flex items-center gap-1.5"><Gamepad2 className="h-4 w-4" /> Play & Earn</h3>
-          <button onClick={() => onNavigate("rewards")} className="text-[11px] text-primary font-semibold flex items-center">View all <ChevronRight className="h-3 w-3" /></button>
+          <button onClick={() => { playClick(); onOpenGames(); }} className="text-[11px] text-primary font-semibold flex items-center">View all <ChevronRight className="h-3 w-3" /></button>
         </div>
-        <div className="flex gap-2 overflow-x-auto -mx-5 px-5 pb-1 scrollbar-hide">
-          <GameCard icon={CircleDot} label="Spin Wheel" color="from-fuchsia-500 to-purple-600" onClick={() => onPickMore("spin")} />
-          <GameCard icon={Ticket} label="Scratch" color="from-blue-500 to-cyan-500" onClick={() => onPickMore("scratch")} />
-          <GameCard icon={Gift} label="Mystery Box" color="from-amber-500 to-orange-500" onClick={() => onPickMore("mystery")} />
-          <GameCard icon={Coins} label="Tap & Earn" color="from-emerald-500 to-green-600" onClick={() => onPickMore("play")} />
+        <div className="grid grid-cols-4 gap-2">
+          <GameTile emoji="🎡" label="Spin"     color="from-purple-600 to-violet-700"  onClick={onOpenGames} />
+          <GameTile emoji="🪙" label="Scratch"  color="from-emerald-600 to-green-700"  onClick={onOpenGames} />
+          <GameTile emoji="❓" label="Quiz"     color="from-blue-600 to-indigo-700"    onClick={onOpenGames} />
+          <GameTile emoji="🎁" label="Lucky"    color="from-rose-600 to-red-700"       onClick={onOpenGames} />
+          <GameTile emoji="🃏" label="Card Flip" color="from-fuchsia-600 to-purple-700" onClick={onOpenGames} />
+          <GameTile emoji="👆" label="Tap"      color="from-sky-600 to-blue-700"       onClick={onOpenGames} />
+          <GameTile emoji="🎲" label="Dice"     color="from-amber-600 to-orange-700"   onClick={onOpenGames} />
+          <GameTile emoji="🧠" label="Memory"   color="from-emerald-600 to-teal-700"   onClick={onOpenGames} />
         </div>
       </div>
 
@@ -382,6 +387,17 @@ function GameCard({ icon: Icon, label, color, onClick }: { icon: LucideIcon; lab
       <Icon className="h-6 w-6 mb-2" />
       <p className="text-xs font-bold leading-tight">{label}</p>
       <p className="text-[10px] opacity-80 mt-0.5">Tap to play</p>
+    </button>
+  );
+}
+
+function GameTile({ emoji, label, color, onClick }: { emoji: string; label: string; color: string; onClick: () => void }) {
+  return (
+    <button onClick={() => { playClick(); vibrate(15); onClick(); }}
+      className={`relative overflow-hidden rounded-2xl p-2 text-white bg-gradient-to-br ${color} shadow-md active:scale-95 transition-transform aspect-square flex flex-col items-center justify-center`}>
+      <div className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-white/15 blur-md" />
+      <div className="text-2xl drop-shadow">{emoji}</div>
+      <p className="text-[10px] font-bold mt-1">{label}</p>
     </button>
   );
 }
