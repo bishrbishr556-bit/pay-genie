@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, Send, Download, QrCode, Smartphone, Receipt, Building2, AtSign, UserCheck, ShieldCheck, Globe,
+  X, Grid3x3, Send, Download, QrCode, Smartphone, Receipt, Building2, AtSign, UserCheck, ShieldCheck, Globe,
   CircleDot, Ticket, Gift, Gamepad2, Wallet, History, FileDown, BarChart3, PieChart, FileText,
   Building, CreditCard, Lock, Shield, User, Volume2, WifiOff, Tag, Users, UserPlus,
   Settings, Moon, Languages, Headphones, Info,
@@ -22,7 +22,15 @@ export type MoreOptionId =
   | "voucher" | "upi-lite" | "autopay" | "insurance" | "gold" | "mutual-funds" | "credit-score"
   | "loan-offers" | "donations" | "travel" | "movies" | "events" | "emi" | "currency" | "nearby"
   | "verify" | "privacy" | "notifications" | "theme" | "activity" | "devices" | "delete-account" | "merchant"
-  | "voice-pay" | "split-bill";
+  | "voice-pay" | "split-bill"
+  // All Services additions
+  | "pay-contact" | "dth" | "water" | "gas" | "cc-payment" | "landline" | "broadband"
+  | "cylinder" | "tax" | "municipal" | "fastag" | "google-play"
+  | "check-balance" | "bank-statement" | "debit-card" | "fixed-deposit" | "recurring-deposit"
+  | "gold-investment" | "loan-repayment"
+  | "rewards" | "coupons" | "cashback-points" | "vip-benefits"
+  | "charity" | "education" | "hospital" | "flight" | "bus" | "hotel"
+  | "biometric" | "logout" | "feedback";
 
 type Item = { id: MoreOptionId; label: string; icon: LucideIcon; color: string };
 type Section = { title: string; accent: string; items: Item[] };
