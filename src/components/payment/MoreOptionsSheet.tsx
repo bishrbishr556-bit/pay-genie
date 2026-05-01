@@ -145,7 +145,7 @@ const SECTIONS: Section[] = [
 
 const TOTAL = SECTIONS.reduce((n, s) => n + s.items.length, 0);
 
-export function MoreOptionsSheet({ open, onClose, onPick }: { open: boolean; onClose: () => void; onPick: (id: MoreOptionId) => void }) {
+export function MoreOptionsSheet({ open, onClose, onPick, onOpenAll }: { open: boolean; onClose: () => void; onPick: (id: MoreOptionId) => void; onOpenAll?: () => void }) {
   return (
     <AnimatePresence>
       {open && (
@@ -162,7 +162,16 @@ export function MoreOptionsSheet({ open, onClose, onPick }: { open: boolean; onC
           >
             <div className="flex items-center justify-between px-5 pt-3 pb-2 relative">
               <div className="absolute top-2 left-1/2 -translate-x-1/2 h-1 w-10 rounded-full bg-slate-700" />
-              <span className="w-9" />
+              {onOpenAll ? (
+                <button
+                  onClick={() => { playClick(); vibrate(15); onOpenAll(); }}
+                  className="flex items-center gap-1 text-xs font-semibold bg-gradient-to-r from-fuchsia-500 to-violet-600 text-white px-3 py-1.5 rounded-full active:scale-95 transition-transform"
+                >
+                  <Grid3x3 className="h-3.5 w-3.5" /> All
+                </button>
+              ) : (
+                <span className="w-9" />
+              )}
               <h2 className="text-lg font-bold">More Options</h2>
               <button
                 aria-label="Close"
