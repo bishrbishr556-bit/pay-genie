@@ -1,0 +1,358 @@
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ChevronLeft, WifiOff, Wifi, ShieldCheck, Trash2, RefreshCw, Check, Clock,
+  ArrowUpRight, Loader2, Lock,
+} from "lucide-react";
+import { initOffline, useOffline, offlineActions } from "@/lib/offline-mode";
+import { playClick, playSuccess, vibrate } from "@/lib/payment-store";
+import { toast } from "sonner";
+
+type View = "main" | "setup" | "unlock" | "pay" | "processing" | "success";
+
+export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
+  useEffect(() => { initOffline(); }, []);
+  const enabled = useOffline((s) => s.enabled);
+  const profile = useOffline((s) => s.profile);
+  const txns = useOffline((s) => s.txns);
+  const syncing = useOffline((s) => s.syncing);
+
+  const [view, setView] = useState<View>("main");
+  const [authed, setAuthed] = useState(false);
+  const [online, setOnline] = useState<boolean>(typeof navigator !== "undefined" ? navigator.onLine : true);
+
+  // setup form
+  const [sName, setSName] = useState("");
+  const [sPhone, setSPhone] = useState("");
+  const [sPin, setSPin] = useState("");
+
+  // unlock pin
+  const [uPin, setUPin] = useState("");
+
+  // pay form
+  const [pTo, setPTo] = useState("");
+  const [pUpi, setPUpi] = useState("");
+  const [pAmount, setPAmount] = useState("");
+  const [pNote, setPNote] = useState("");
+  const [payPin, setPayPin] = useState("");
+  const [processStep, setProcessStep] = useState("");
+
+  useEffect(() => {
+    const on = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener("online", on);
+    window.addEventListener("offline", off);
+    return () => { window.removeEventListener("online", on); window.removeEventListener("offline", off); };
+  }, []);
+
+  const tap = (fn?: () => void) => () => { playClick(); vibrate(15); fn?.(); };
+
+  const handleToggle = () => {
+    playClick(); vibrate(15);
+    if (!enabled) {
+      setView("setup");
+    } else {
+      offlineActions.disable();
+      setAuthed(false);
+      toast.success("Offline mode disabled");
+    }
+  };
+
+  const handleEnable = () => {
+    if (sName.trim().length < 2) { toast.error("Enter your name"); return; }
+    if (!/^\+?\d{7,15}$/.test(sPhone.replace(/\s/g, ""))) { toast.error("Enter a valid phone"); return; }
+    if (!/^\d{4}$/.test(sPin)) { toast.error("PIN must be 4 digits"); return; }
+    offlineActions.enable({ name: sName, phone: sPhone, pin: sPin });
+    playSuccess(); vibrate([20, 30, 20]);
+    setSName(""); setSPhone(""); setSPin("");
+    setAuthed(true);
+    setView("main");
+    toast.success("Offline mode enabled");
+  };
+
+  const handleUnlock = () => {
+    if (offlineActions.verifyPin(uPin)) {
+      setAuthed(true); setUPin(""); setView("main");
+      playSuccess(); vibrate(20);
+    } else {
+      toast.error("Wrong PIN"); vibrate([60, 40, 60]); setUPin("");
+    }
+  };
+
+  const handlePay = async () => {
+    const amt = Number(pAmount);
+    if (!pTo.trim()) { toast.error("Enter recipient"); return; }
+    if (!pUpi.trim()) { toast.error("Enter UPI / phone"); return; }
+    if (!amt || amt <= 0) { toast.error("Enter valid amount"); return; }
+    if (!offlineActions.verifyPin(payPin)) { toast.error("Wrong PIN"); vibrate([60, 40, 60]); return; }
+
+    setView("processing");
+    const steps = ["Connecting to bank…", "Encrypting transaction…", "Saving offline…"];
+    for (const s of steps) {
+      setProcessStep(s);
+      await new Promise((r) => setTimeout(r, 700));
+    }
+    offlineActions.addTxn({ to: pTo.trim(), upi: pUpi.trim(), amount: amt, note: pNote.trim() || undefined });
+    playSuccess(); vibrate([20, 40, 20]);
+    setView("success");
+    setTimeout(() => {
+      setPTo(""); setPUpi(""); setPAmount(""); setPNote(""); setPayPin("");
+      setView("main");
+    }, 1800);
+  };
+
+  const handleSync = async () => {
+    if (!online) { toast.error("You're offline — connect to sync"); return; }
+    const n = await offlineActions.syncPending();
+    if (n > 0) { playSuccess(); toast.success(`${n} transaction${n > 1 ? "s" : ""} synced`); }
+    else toast.message("Nothing to sync");
+  };
+
+  // Auto-prompt unlock when entering enabled mode
+  useEffect(() => {
+    if (enabled && !authed && view === "main") setView("unlock");
+  }, [enabled, authed, view]);
+
+  const pendingCount = txns.filter((t) => t.status === "pending").length;
+
+  return (
+    <div className="h-full overflow-y-auto bg-slate-950 text-slate-100 pb-28">
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-slate-950/85 backdrop-blur px-4 pt-3 pb-3 flex items-center">
+        <button onClick={tap(onBack)} className="h-9 w-9 rounded-full flex items-center justify-center active:scale-90 transition" aria-label="Back">
+          <ChevronLeft className="h-6 w-6" />
+        </button>
+        <h1 className="flex-1 text-center text-base font-bold pr-9">Offline Mode</h1>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {/* SETUP */}
+        {view === "setup" && (
+          <motion.div key="setup" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="px-4 pt-3">
+            <div className="bg-gradient-to-br from-orange-600/20 to-red-600/10 border border-orange-500/30 rounded-2xl p-4 mb-4">
+              <div className="flex items-center gap-2 mb-1">
+                <WifiOff className="h-4 w-4 text-orange-400" />
+                <p className="text-sm font-bold text-orange-300">Enable Offline Mode</p>
+              </div>
+              <p className="text-xs text-slate-400">Create a secure local profile. Transactions will be saved locally and synced when online.</p>
+            </div>
+
+            <div className="space-y-3">
+              <Field label="Name">
+                <input value={sName} onChange={(e) => setSName(e.target.value)} maxLength={40} placeholder="Your name" className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500" />
+              </Field>
+              <Field label="Phone">
+                <input value={sPhone} onChange={(e) => setSPhone(e.target.value)} inputMode="tel" maxLength={16} placeholder="+91 98765 43210" className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500" />
+              </Field>
+              <Field label="Create 4-digit PIN">
+                <input value={sPin} onChange={(e) => setSPin(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" type="password" placeholder="••••" className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500 tracking-[0.5em] text-center" />
+              </Field>
+            </div>
+
+            <button onClick={tap(handleEnable)} className="mt-5 w-full h-12 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 font-bold active:scale-[0.98] transition shadow-lg shadow-orange-900/40">
+              Enable Offline Mode
+            </button>
+            <button onClick={tap(() => setView("main"))} className="mt-2 w-full h-10 rounded-xl text-slate-400 text-sm">Cancel</button>
+          </motion.div>
+        )}
+
+        {/* UNLOCK */}
+        {view === "unlock" && enabled && (
+          <motion.div key="unlock" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="px-4 pt-6 text-center">
+            <div className="h-16 w-16 mx-auto rounded-full bg-orange-500/20 flex items-center justify-center mb-3">
+              <Lock className="h-7 w-7 text-orange-400" />
+            </div>
+            <p className="font-bold">Enter Offline PIN</p>
+            <p className="text-xs text-slate-400 mb-4">Hi {profile?.name}, unlock to continue</p>
+            <input
+              autoFocus
+              value={uPin}
+              onChange={(e) => setUPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              inputMode="numeric"
+              type="password"
+              placeholder="••••"
+              className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500 tracking-[0.6em] text-center text-xl max-w-[180px] mx-auto"
+            />
+            <button onClick={tap(handleUnlock)} disabled={uPin.length !== 4} className="mt-4 w-full max-w-[220px] mx-auto h-11 rounded-xl bg-emerald-500 font-bold disabled:opacity-50 block">
+              Unlock
+            </button>
+            <button onClick={tap(onBack)} className="mt-2 text-xs text-slate-400">Back</button>
+          </motion.div>
+        )}
+
+        {/* PROCESSING */}
+        {view === "processing" && (
+          <motion.div key="proc" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-4 pt-12 text-center">
+            <Loader2 className="h-10 w-10 animate-spin text-emerald-400 mx-auto mb-4" />
+            <p className="font-semibold">{processStep}</p>
+            <p className="text-xs text-slate-400 mt-1">Please wait…</p>
+          </motion.div>
+        )}
+
+        {/* SUCCESS */}
+        {view === "success" && (
+          <motion.div key="ok" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="px-4 pt-12 text-center">
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 260 }} className="h-20 w-20 mx-auto rounded-full bg-emerald-500 flex items-center justify-center mb-4">
+              <Check className="h-10 w-10 text-white" strokeWidth={3} />
+            </motion.div>
+            <p className="font-bold text-lg">Saved Offline ✔</p>
+            <p className="text-xs text-orange-400 mt-1">This is offline transaction. Will complete when online.</p>
+          </motion.div>
+        )}
+
+        {/* PAY */}
+        {view === "pay" && (
+          <motion.div key="pay" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="px-4 pt-3">
+            <div className="space-y-3">
+              <Field label="Recipient name"><input value={pTo} onChange={(e) => setPTo(e.target.value)} className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500" placeholder="John" /></Field>
+              <Field label="UPI / Phone"><input value={pUpi} onChange={(e) => setPUpi(e.target.value)} className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500" placeholder="john@upi" /></Field>
+              <Field label="Amount (₹)"><input value={pAmount} onChange={(e) => setPAmount(e.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500" placeholder="0" /></Field>
+              <Field label="Note (optional)"><input value={pNote} onChange={(e) => setPNote(e.target.value)} maxLength={60} className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500" placeholder="Lunch" /></Field>
+              <Field label="Confirm PIN">
+                <input value={payPin} onChange={(e) => setPayPin(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" type="password" className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500 tracking-[0.5em] text-center" placeholder="••••" />
+              </Field>
+            </div>
+            <button onClick={tap(handlePay)} className="mt-5 w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 font-bold active:scale-[0.98] transition">
+              Pay Offline
+            </button>
+            <button onClick={tap(() => setView("main"))} className="mt-2 w-full h-10 rounded-xl text-slate-400 text-sm">Cancel</button>
+          </motion.div>
+        )}
+
+        {/* MAIN */}
+        {view === "main" && (!enabled || authed) && (
+          <motion.div key="main" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="px-4 pt-3">
+            {/* Status card */}
+            <div className={`rounded-2xl p-4 border ${enabled ? "bg-gradient-to-br from-orange-600/20 to-red-600/10 border-orange-500/30" : "bg-slate-900 border-slate-800"}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${enabled ? "bg-orange-500/20" : "bg-slate-800"}`}>
+                    {enabled ? <WifiOff className="h-5 w-5 text-orange-400" /> : <Wifi className="h-5 w-5 text-slate-400" />}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold">{enabled ? "Offline Mode: ON" : "Offline Mode: OFF"}</p>
+                    <p className="text-[11px] text-slate-400">{enabled ? "Use app without internet" : "Enable to use without internet"}</p>
+                  </div>
+                </div>
+                <Toggle on={enabled} onChange={handleToggle} />
+              </div>
+              {enabled && (
+                <p className="text-[11px] text-slate-300 mt-3 leading-relaxed">
+                  All transactions will be saved locally and synced when online.
+                </p>
+              )}
+            </div>
+
+            {enabled && (
+              <>
+                {/* Profile */}
+                <div className="mt-4 bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center font-bold">
+                    {(profile?.name || "U").charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate">{profile?.name}</p>
+                    <p className="text-[11px] text-slate-400 truncate">{profile?.phone}</p>
+                  </div>
+                  <span className="text-[10px] font-semibold text-emerald-400 inline-flex items-center gap-1">
+                    <ShieldCheck className="h-3 w-3" /> Secured
+                  </span>
+                </div>
+
+                {/* Actions */}
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <button onClick={tap(() => setView("pay"))} className="h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition">
+                    <ArrowUpRight className="h-4 w-4" /> Offline Pay
+                  </button>
+                  <button onClick={tap(handleSync)} disabled={syncing} className="h-14 rounded-2xl bg-slate-800 border border-slate-700 font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition disabled:opacity-60">
+                    {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                    Sync ({pendingCount})
+                  </button>
+                </div>
+
+                {/* Connection status */}
+                <div className="mt-3 flex items-center justify-center gap-2 text-[11px]">
+                  {online ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400">
+                      <Wifi className="h-3 w-3" /> Online — auto-sync enabled
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-500/15 text-orange-400">
+                      <WifiOff className="h-3 w-3" /> No internet
+                    </span>
+                  )}
+                </div>
+
+                {/* History */}
+                <div className="mt-5">
+                  <div className="flex items-center justify-between mb-2 px-1">
+                    <h2 className="text-[11px] font-bold tracking-[0.12em] text-slate-400">OFFLINE TRANSACTIONS</h2>
+                    {txns.length > 0 && (
+                      <button onClick={tap(() => { offlineActions.clear(); offlineActions.enable({ name: profile!.name, phone: profile!.phone, pin: "0000" }); })} className="hidden">reset</button>
+                    )}
+                  </div>
+                  <div className="bg-slate-900 border border-slate-800 rounded-2xl divide-y divide-slate-800/80 overflow-hidden">
+                    {txns.length === 0 ? (
+                      <p className="text-center text-xs text-slate-500 py-8">No offline transactions yet</p>
+                    ) : (
+                      txns.slice(0, 20).map((t) => (
+                        <div key={t.id} className="p-3.5 flex items-center gap-3">
+                          <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${t.status === "synced" ? "bg-emerald-500/15 text-emerald-400" : "bg-orange-500/15 text-orange-400"}`}>
+                            {t.status === "synced" ? <Check className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-semibold truncate">{t.to}</p>
+                            <p className="text-[11px] text-slate-400 truncate">{t.upi} · {new Date(t.ts).toLocaleString()}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[13px] font-bold">₹{t.amount}</p>
+                            <p className={`text-[10px] font-semibold ${t.status === "synced" ? "text-emerald-400" : "text-orange-400"}`}>
+                              {t.status === "synced" ? "Synced ✔" : "Pending ⏳"}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Danger */}
+                <button
+                  onClick={tap(() => { offlineActions.clear(); setAuthed(false); toast.success("Offline data cleared"); })}
+                  className="mt-5 w-full h-11 rounded-xl border border-red-500/30 text-red-400 text-sm font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition"
+                >
+                  <Trash2 className="h-4 w-4" /> Clear Offline Data
+                </button>
+              </>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="block text-[11px] font-semibold text-slate-400 mb-1.5 px-1">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
+  return (
+    <button
+      onClick={onChange}
+      className={`relative h-7 w-12 rounded-full transition-colors ${on ? "bg-orange-500" : "bg-slate-700"}`}
+      aria-pressed={on}
+    >
+      <motion.span
+        layout
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow ${on ? "right-0.5" : "left-0.5"}`}
+      />
+    </button>
+  );
+}

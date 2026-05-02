@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import {
   ChevronLeft, ChevronRight, BadgeCheck, ShieldCheck, CreditCard, Lock, EyeOff, Bell,
   Palette, Globe, HelpCircle, Users, Activity, Smartphone, Trash2, Store, Volume2, Pencil, Check,
+  WifiOff,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { actions, playClick, vibrate } from "@/lib/payment-store";
@@ -69,6 +70,7 @@ export function ProfileScreen({
         { icon: CreditCard, label: "UPI & Payment Settings", sub: "Manage UPI ID, linked accounts & limits", tint: "from-violet-500 to-purple-600", onClick: () => onPickMore("upi-id") },
         { icon: ShieldCheck, label: "Security Center", sub: "Manage PIN, biometric & security", tint: "from-blue-500 to-sky-600", onClick: () => onPickMore("security") },
         { icon: Lock, label: "Change PIN", sub: "Update your 4-digit secure PIN", tint: "from-orange-500 to-amber-600", onClick: () => onPickMore("change-pin") },
+        { icon: WifiOff, label: "Offline Mode", sub: "Use app without internet · store locally", tint: "from-orange-500 to-red-600", onClick: () => onPickMore("offline") },
         { icon: EyeOff, label: "Privacy Controls", sub: "Control who can see your information", tint: "from-cyan-500 to-teal-600", onClick: () => onPickMore("privacy") },
         { icon: Bell, label: "Notification Settings", sub: "Customize alerts & notifications", tint: "from-amber-500 to-orange-500", onClick: () => onPickMore("notifications") },
       ],
