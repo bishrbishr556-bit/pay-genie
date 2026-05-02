@@ -5,6 +5,8 @@ import {
   TrendingUp, Store, Volume2, MoreHorizontal, Eye, EyeOff, Plus, History,
   FileDown, Sparkles, Flame, Users, ChevronRight, Gamepad2, CircleDot,
   ShieldCheck, BarChart3, Bot, Mic, Receipt,
+  Building2, AtSign, UserCheck, UsersRound, Gift, BadgePercent,
+  CreditCard, Gauge, ShieldPlus, Plane, Ticket,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Tab } from "./BottomNav";
@@ -253,6 +255,77 @@ export function HomeScreen({
           <QuickAction icon={Tv}         label="DTH"      color="from-rose-500 to-pink-600"    onClick={() => onPickMore("bills")} />
           <QuickAction icon={Droplet}    label="Water"    color="from-sky-500 to-blue-600"     onClick={() => onPickMore("bills")} />
         </div>
+      </div>
+
+      {/* Send Money To */}
+      <div className="px-5 mt-5">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold flex items-center gap-1.5"><Send className="h-4 w-4" /> Send Money To</h3>
+          <button onClick={() => { playClick(); onNavigate("pay"); }} className="text-[11px] text-primary font-semibold flex items-center">View all <ChevronRight className="h-3 w-3" /></button>
+        </div>
+        <div className="bg-card rounded-2xl shadow-card p-4 grid grid-cols-4 gap-3">
+          <QuickAction icon={Smartphone} label="Mobile"   color="from-emerald-500 to-teal-600" onClick={() => onNavigate("pay")} />
+          <QuickAction icon={Building2}  label="Bank"     color="from-violet-500 to-purple-600" onClick={() => onPickMore("bank-transfer")} />
+          <QuickAction icon={AtSign}     label="UPI ID"   color="from-pink-500 to-rose-600"     onClick={() => onPickMore("upi-id")} />
+          <QuickAction icon={QrCode}     label="Scan QR"  color="from-purple-500 to-fuchsia-600" onClick={() => onNavigate("scanner")} />
+          <QuickAction icon={Users}      label="Contacts" color="from-blue-500 to-indigo-600"   onClick={() => onPickMore("pay-contact")} />
+          <QuickAction icon={UsersRound} label="Groups"   color="from-cyan-500 to-sky-600"      onClick={() => onPickMore("split-bill")} />
+          <QuickAction icon={UserCheck}  label="Self"     color="from-indigo-500 to-blue-600"   onClick={() => onPickMore("self")} />
+          <QuickAction icon={Receipt}    label="Bills"    color="from-amber-500 to-orange-600"  onClick={() => onPickMore("bills")} />
+        </div>
+      </div>
+
+      {/* Offers For You */}
+      <div className="px-5 mt-5">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold flex items-center gap-1.5"><Flame className="h-4 w-4 text-orange-500" /> Offers For You</h3>
+          <button onClick={() => { playClick(); onPickMore("offers"); }} className="text-[11px] text-primary font-semibold flex items-center">View all <ChevronRight className="h-3 w-3" /></button>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <OfferCard emoji="💰" title="₹50 Cashback" sub="On bills above ₹500" color="from-emerald-500 to-teal-600" onClick={() => onPickMore("offers")} />
+          <OfferCard emoji="🎁" title="₹100 Bonus"   sub="First UPI of the day" color="from-fuchsia-500 to-purple-600" onClick={() => onPickMore("offers")} />
+          <OfferCard emoji="🎉" title="Festival Offer" sub="Up to 30% off" color="from-rose-500 to-pink-600" onClick={() => onPickMore("offers")} />
+          <OfferCard emoji="👥" title="Refer Bonus"  sub="Invite & earn ₹100" color="from-amber-500 to-orange-600" onClick={() => onPickMore("refer")} />
+        </div>
+      </div>
+
+      {/* Services */}
+      <div className="px-5 mt-5">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold flex items-center gap-1.5"><Sparkles className="h-4 w-4" /> Services</h3>
+          <button onClick={() => { playClick(); onOpenAll?.(); }} className="text-[11px] text-primary font-semibold flex items-center">All <ChevronRight className="h-3 w-3" /></button>
+        </div>
+        <div className="bg-card rounded-2xl shadow-card p-4 grid grid-cols-4 gap-3">
+          <QuickAction icon={Receipt}      label="Bills"    color="from-orange-500 to-red-500"     onClick={() => onPickMore("bills")} />
+          <QuickAction icon={Smartphone}   label="Recharge" color="from-emerald-500 to-teal-600"   onClick={() => onPickMore("recharge")} />
+          <QuickAction icon={CreditCard}   label="Cards"    color="from-violet-500 to-purple-600"  onClick={() => onPickMore("cards")} />
+          <QuickAction icon={BadgePercent} label="Loans"    color="from-rose-500 to-red-600"       onClick={() => onPickMore("loan-offers")} />
+          <QuickAction icon={Gauge}        label="Credit"   color="from-purple-500 to-pink-600"    onClick={() => onPickMore("credit-score")} />
+          <QuickAction icon={ShieldPlus}   label="Insurance" color="from-blue-500 to-indigo-600"   onClick={() => onPickMore("insurance")} />
+          <QuickAction icon={Plane}        label="Travel"   color="from-sky-500 to-blue-600"       onClick={() => onPickMore("travel")} />
+          <QuickAction icon={Ticket}       label="Tickets"  color="from-fuchsia-500 to-purple-600" onClick={() => onPickMore("movies")} />
+        </div>
+      </div>
+
+      {/* Insights */}
+      <div className="px-5 mt-5">
+        <button
+          onClick={() => { playClick(); vibrate(10); onPickMore("analytics"); }}
+          className="w-full text-left bg-gradient-to-br from-slate-900 to-indigo-900 text-white rounded-2xl p-4 shadow-card active:scale-[0.98] transition-transform"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[11px] opacity-80 flex items-center gap-1"><BarChart3 className="h-3.5 w-3.5" /> Spending Insights</p>
+              <p className="text-lg font-bold mt-0.5">You spent ₹2,450 this week</p>
+              <p className="text-[11px] opacity-80 mt-0.5">📈 12% less than last week</p>
+            </div>
+            <div className="flex items-end gap-1 h-12">
+              {[35, 55, 25, 70, 45, 85, 60].map((h, i) => (
+                <div key={i} className="w-1.5 bg-white/80 rounded-t" style={{ height: `${h}%` }} />
+              ))}
+            </div>
+          </div>
+        </button>
       </div>
 
       {/* Streak + Referral */}
