@@ -498,18 +498,6 @@ function OfferCard({ emoji, title, sub, color, onClick }: { emoji: string; title
   );
 }
 
-function _SuggestCardOriginal({ icon, title, sub }: { icon: string; title: string; sub: string }) {
-  return (
-    <div className="bg-card rounded-2xl shadow-card p-3 flex items-center gap-3">
-      <div className="text-2xl">{icon}</div>
-      <div className="flex-1">
-        <p className="text-sm font-semibold">{title}</p>
-        <p className="text-xs text-muted-foreground">{sub}</p>
-      </div>
-    </div>
-  );
-}
-
 function QuickChip({ emoji, label, onClick }: { emoji: string; label: string; onClick: () => void }) {
   return (
     <button onClick={() => { playClick(); vibrate(10); onClick(); }}
