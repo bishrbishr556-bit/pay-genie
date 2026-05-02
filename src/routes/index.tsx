@@ -18,6 +18,7 @@ import { VoicePayScreen } from "@/components/payment/VoicePayScreen";
 import { SplitBillScreen } from "@/components/payment/SplitBillScreen";
 import { GamesScreen } from "@/components/payment/GamesScreen";
 import { AllServicesScreen } from "@/components/payment/AllServicesScreen";
+import { OfflineModeScreen } from "@/components/payment/OfflineModeScreen";
 import type { MoreOptionId } from "@/components/payment/MoreOptionsSheet";
 import { actions } from "@/lib/payment-store";
 import { toast } from "sonner";
@@ -56,6 +57,7 @@ function Index() {
   const [splitBill, setSplitBill] = useState(false);
   const [games, setGames] = useState(false);
   const [allServices, setAllServices] = useState(false);
+  const [offlineScreen, setOfflineScreen] = useState(false);
   const [online, setOnline] = useState(true);
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [openRewardId, setOpenRewardId] = useState<string | null>(null);
@@ -148,6 +150,7 @@ function Index() {
     if (id === "merchant") { setOverlay("merchant"); return; }
     if (id === "voice-pay") { setVoicePay(true); return; }
     if (id === "split-bill") { setSplitBill(true); return; }
+    if (id === "offline") { setOfflineScreen(true); return; }
     setMoreOpt(id);
   };
 
@@ -176,7 +179,11 @@ function Index() {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
-        {allServices ? (
+        {offlineScreen ? (
+          <motion.div key="off" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <OfflineModeScreen onBack={() => setOfflineScreen(false)} />
+          </motion.div>
+        ) : allServices ? (
           <motion.div key="all" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
             <AllServicesScreen onBack={() => setAllServices(false)} onPick={(id) => { setAllServices(false); onPickMore(id); }} />
           </motion.div>
@@ -246,7 +253,7 @@ function Index() {
         )}
       </AnimatePresence>
 
-      <BottomNav active={tab} onChange={(t) => { setOverlay(null); setMoreOpt(null); setRechargeKind(null); setVoicePay(false); setSplitBill(false); setGames(false); setAllServices(false); setTab(t); }} />
+      <BottomNav active={tab} onChange={(t) => { setOverlay(null); setMoreOpt(null); setRechargeKind(null); setVoicePay(false); setSplitBill(false); setGames(false); setAllServices(false); setOfflineScreen(false); setTab(t); }} />
       <Toaster position="top-center" />
     </PhoneFrame>
   );
