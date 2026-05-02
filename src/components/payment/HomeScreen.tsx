@@ -486,6 +486,30 @@ function SuggestCard({ icon, title, sub }: { icon: string; title: string; sub: s
   );
 }
 
+function OfferCard({ emoji, title, sub, color, onClick }: { emoji: string; title: string; sub: string; color: string; onClick: () => void }) {
+  return (
+    <button onClick={() => { playClick(); vibrate(12); onClick(); }}
+      className={`relative overflow-hidden text-left rounded-2xl p-3 text-white bg-gradient-to-br ${color} shadow-card active:scale-95 transition-transform`}>
+      <div className="absolute -top-3 -right-3 h-12 w-12 rounded-full bg-white/20 blur-md" />
+      <div className="text-xl">{emoji}</div>
+      <p className="text-sm font-bold mt-1 leading-tight">{title}</p>
+      <p className="text-[10px] opacity-90 mt-0.5">{sub}</p>
+    </button>
+  );
+}
+
+function _SuggestCardOriginal({ icon, title, sub }: { icon: string; title: string; sub: string }) {
+  return (
+    <div className="bg-card rounded-2xl shadow-card p-3 flex items-center gap-3">
+      <div className="text-2xl">{icon}</div>
+      <div className="flex-1">
+        <p className="text-sm font-semibold">{title}</p>
+        <p className="text-xs text-muted-foreground">{sub}</p>
+      </div>
+    </div>
+  );
+}
+
 function QuickChip({ emoji, label, onClick }: { emoji: string; label: string; onClick: () => void }) {
   return (
     <button onClick={() => { playClick(); vibrate(10); onClick(); }}
