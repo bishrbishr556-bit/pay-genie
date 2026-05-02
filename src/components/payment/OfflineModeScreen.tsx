@@ -139,13 +139,13 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
 
             <div className="space-y-3">
               <Field label="Name">
-                <input value={sName} onChange={(e) => setSName(e.target.value)} maxLength={40} placeholder="Your name" className="input-dark" />
+                <input value={sName} onChange={(e) => setSName(e.target.value)} maxLength={40} placeholder="Your name" className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500" />
               </Field>
               <Field label="Phone">
-                <input value={sPhone} onChange={(e) => setSPhone(e.target.value)} inputMode="tel" maxLength={16} placeholder="+91 98765 43210" className="input-dark" />
+                <input value={sPhone} onChange={(e) => setSPhone(e.target.value)} inputMode="tel" maxLength={16} placeholder="+91 98765 43210" className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500" />
               </Field>
               <Field label="Create 4-digit PIN">
-                <input value={sPin} onChange={(e) => setSPin(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" type="password" placeholder="••••" className="input-dark tracking-[0.5em] text-center" />
+                <input value={sPin} onChange={(e) => setSPin(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" type="password" placeholder="••••" className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500 tracking-[0.5em] text-center" />
               </Field>
             </div>
 
@@ -171,7 +171,7 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
               inputMode="numeric"
               type="password"
               placeholder="••••"
-              className="input-dark tracking-[0.6em] text-center text-xl max-w-[180px] mx-auto"
+              className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500 tracking-[0.6em] text-center text-xl max-w-[180px] mx-auto"
             />
             <button onClick={tap(handleUnlock)} disabled={uPin.length !== 4} className="mt-4 w-full max-w-[220px] mx-auto h-11 rounded-xl bg-emerald-500 font-bold disabled:opacity-50 block">
               Unlock
@@ -204,12 +204,12 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
         {view === "pay" && (
           <motion.div key="pay" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="px-4 pt-3">
             <div className="space-y-3">
-              <Field label="Recipient name"><input value={pTo} onChange={(e) => setPTo(e.target.value)} className="input-dark" placeholder="John" /></Field>
-              <Field label="UPI / Phone"><input value={pUpi} onChange={(e) => setPUpi(e.target.value)} className="input-dark" placeholder="john@upi" /></Field>
-              <Field label="Amount (₹)"><input value={pAmount} onChange={(e) => setPAmount(e.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" className="input-dark" placeholder="0" /></Field>
-              <Field label="Note (optional)"><input value={pNote} onChange={(e) => setPNote(e.target.value)} maxLength={60} className="input-dark" placeholder="Lunch" /></Field>
+              <Field label="Recipient name"><input value={pTo} onChange={(e) => setPTo(e.target.value)} className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500" placeholder="John" /></Field>
+              <Field label="UPI / Phone"><input value={pUpi} onChange={(e) => setPUpi(e.target.value)} className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500" placeholder="john@upi" /></Field>
+              <Field label="Amount (₹)"><input value={pAmount} onChange={(e) => setPAmount(e.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500" placeholder="0" /></Field>
+              <Field label="Note (optional)"><input value={pNote} onChange={(e) => setPNote(e.target.value)} maxLength={60} className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500" placeholder="Lunch" /></Field>
               <Field label="Confirm PIN">
-                <input value={payPin} onChange={(e) => setPayPin(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" type="password" className="input-dark tracking-[0.5em] text-center" placeholder="••••" />
+                <input value={payPin} onChange={(e) => setPayPin(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" type="password" className="w-full h-11 px-3 rounded-xl bg-slate-900 border border-slate-700 text-sm outline-none focus:border-emerald-500 tracking-[0.5em] text-center" placeholder="••••" />
               </Field>
             </div>
             <button onClick={tap(handlePay)} className="mt-5 w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 font-bold active:scale-[0.98] transition">
