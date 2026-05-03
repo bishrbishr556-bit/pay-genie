@@ -419,6 +419,17 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+function Tile({ icon: Icon, label, color, onClick }: { icon: any; label: string; color: string; onClick: () => void }) {
+  return (
+    <button onClick={() => { playClick(); vibrate(10); onClick(); }} className="flex flex-col items-center gap-1.5 p-2 rounded-xl active:scale-90 transition">
+      <div className={`h-11 w-11 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center shadow-md`}>
+        <Icon className="h-5 w-5 text-white" />
+      </div>
+      <span className="text-[10px] text-slate-300 font-medium">{label}</span>
+    </button>
+  );
+}
+
 function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
   return (
     <button
