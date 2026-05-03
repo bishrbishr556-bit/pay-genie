@@ -5,7 +5,7 @@ import {
   ArrowUpRight, Loader2, Lock, Send, QrCode, Gift, Smartphone, Building2,
   Users, History as HistoryIcon, Sparkles, Bell, Eye, EyeOff,
 } from "lucide-react";
-import { initOffline, useOffline, offlineActions } from "@/lib/offline-mode";
+import { initOffline, useOffline, offlineActions, onSync } from "@/lib/offline-mode";
 import { playClick, playSuccess, vibrate } from "@/lib/payment-store";
 import { toast } from "sonner";
 
@@ -40,6 +40,7 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
   const [pNote, setPNote] = useState("");
   const [payPin, setPayPin] = useState("");
   const [processStep, setProcessStep] = useState("");
+  const [lastTxn, setLastTxn] = useState<{ to: string; amount: number; id: string } | null>(null);
 
   useEffect(() => {
     const on = () => setOnline(true);
@@ -47,6 +48,17 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
     window.addEventListener("online", on);
     window.addEventListener("offline", off);
     return () => { window.removeEventListener("online", on); window.removeEventListener("offline", off); };
+  }, []);
+
+  // Auto-sync notification when connectivity returns
+  useEffect(() => {
+    const off = onSync((n) => {
+      playSuccess(); vibrate([20, 30, 20]);
+      toast.success(`✔ ${n} pending transaction${n > 1 ? "s" : ""} synced`, {
+        description: "Internet restored — all offline payments completed",
+      });
+    });
+    return off;
   }, []);
 
   const tap = (fn?: () => void) => () => { playClick(); vibrate(15); fn?.(); };
@@ -103,18 +115,17 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
     if (!offlineActions.verifyPin(payPin)) { toast.error("Wrong PIN"); vibrate([60, 40, 60]); return; }
 
     setView("processing");
-    const steps = ["Connecting to bank…", "Encrypting transaction…", "Saving offline…"];
+    const steps = ["Connecting to bank…", "Verifying details…", "Processing payment…", "Saving offline…"];
     for (const s of steps) {
       setProcessStep(s);
-      await new Promise((r) => setTimeout(r, 700));
+      await new Promise((r) => setTimeout(r, 650));
     }
-    offlineActions.addTxn({ to: pTo.trim(), upi: pUpi.trim(), amount: amt, note: pNote.trim() || undefined });
+    const txn = offlineActions.addTxn({ to: pTo.trim(), upi: pUpi.trim(), amount: amt, note: pNote.trim() || undefined });
+    setLastTxn({ to: txn.to, amount: txn.amount, id: txn.id });
     playSuccess(); vibrate([20, 40, 20]);
     setView("success");
-    setTimeout(() => {
-      setPTo(""); setPUpi(""); setPAmount(""); setPNote(""); setPayPin("");
-      setView("main");
-    }, 1800);
+    // clear form, but stay on success until user dismisses
+    setPTo(""); setPUpi(""); setPAmount(""); setPNote(""); setPayPin("");
   };
 
   const handleSync = async () => {
@@ -226,12 +237,29 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
 
         {/* SUCCESS */}
         {view === "success" && (
-          <motion.div key="ok" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="px-4 pt-12 text-center">
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 260 }} className="h-20 w-20 mx-auto rounded-full bg-emerald-500 flex items-center justify-center mb-4">
-              <Check className="h-10 w-10 text-white" strokeWidth={3} />
+          <motion.div key="ok" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-4 pt-10 text-center">
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 260, damping: 16 }} className="h-24 w-24 mx-auto rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center mb-4 shadow-lg shadow-emerald-900/40">
+              <Check className="h-12 w-12 text-white" strokeWidth={3} />
             </motion.div>
-            <p className="font-bold text-lg">Saved Offline ✔</p>
-            <p className="text-xs text-orange-400 mt-1">This is offline transaction. Will complete when online.</p>
+            <p className="font-bold text-xl">Payment Successful</p>
+            {lastTxn && (
+              <>
+                <p className="text-3xl font-extrabold mt-3">₹{lastTxn.amount.toLocaleString("en-IN")}</p>
+                <p className="text-sm text-slate-300 mt-1">sent to <b>{lastTxn.to}</b></p>
+                <div className="mt-4 inline-flex items-center gap-2 bg-orange-500/15 border border-orange-500/30 rounded-full px-3 py-1.5">
+                  <Clock className="h-3.5 w-3.5 text-orange-400" />
+                  <span className="text-[11px] font-semibold text-orange-300">Status: Pending Sync</span>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-3">Txn ID: {lastTxn.id.slice(0, 12).toUpperCase()}</p>
+                <p className="text-[10px] text-slate-500">{new Date().toLocaleString()}</p>
+              </>
+            )}
+            <button
+              onClick={tap(() => { setLastTxn(null); setView("main"); })}
+              className="mt-6 w-full h-12 rounded-xl bg-emerald-500 font-bold active:scale-[0.98] transition"
+            >
+              Done
+            </button>
           </motion.div>
         )}
 

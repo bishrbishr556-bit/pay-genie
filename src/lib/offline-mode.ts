@@ -43,13 +43,24 @@ function persist() {
 }
 
 let inited = false;
+type SyncListener = (count: number) => void;
+const syncListeners = new Set<SyncListener>();
+export function onSync(cb: SyncListener) {
+  syncListeners.add(cb);
+  return () => { syncListeners.delete(cb); };
+}
+
 export function initOffline() {
   if (inited) return;
   inited = true;
   state = load();
   listeners.forEach((l) => l());
   if (typeof window !== "undefined") {
-    window.addEventListener("online", () => { void offlineActions.syncPending(); });
+    window.addEventListener("online", () => {
+      void offlineActions.syncPending().then((n) => {
+        if (n > 0) syncListeners.forEach((l) => l(n));
+      });
+    });
   }
 }
 
