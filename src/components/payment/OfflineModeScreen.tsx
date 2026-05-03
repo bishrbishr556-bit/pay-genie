@@ -280,6 +280,27 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
 
             {enabled && (
               <>
+                {/* Demo balance card (clone of home) */}
+                <div className="mt-4 relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 text-white shadow-lg">
+                  <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/15 blur-xl" />
+                  <div className="relative flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 text-[11px] opacity-90">
+                        <span>Demo Balance</span>
+                        <button onClick={tap(() => setHideBal((v) => !v))} className="opacity-90">
+                          {hideBal ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                        </button>
+                      </div>
+                      <p className="text-3xl font-bold mt-1">{hideBal ? "₹ ••••••" : "₹5,000.00"}</p>
+                      <p className="text-[10px] opacity-80 mt-0.5">A/C ••••0000 · Offline Wallet</p>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-[10px] bg-white/20 backdrop-blur px-2 py-1 rounded-full">
+                      <WifiOff className="h-3 w-3" /> Offline
+                    </span>
+                  </div>
+                  <p className="relative text-[10px] mt-3 bg-white/15 rounded-full px-2 py-1 inline-block">📡 Offline Mode Active · all txns pending sync</p>
+                </div>
+
                 {/* Profile */}
                 <div className="mt-4 bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center font-bold">
@@ -294,16 +315,38 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
                   </span>
                 </div>
 
-                {/* Actions */}
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <button onClick={tap(() => setView("pay"))} className="h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition">
-                    <ArrowUpRight className="h-4 w-4" /> Offline Pay
-                  </button>
-                  <button onClick={tap(handleSync)} disabled={syncing} className="h-14 rounded-2xl bg-slate-800 border border-slate-700 font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition disabled:opacity-60">
-                    {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                    Sync ({pendingCount})
-                  </button>
+                {/* Quick Actions */}
+                <h3 className="mt-5 mb-2 text-[11px] font-bold tracking-[0.12em] text-slate-400 px-1">⚡ QUICK ACTIONS</h3>
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 grid grid-cols-4 gap-2">
+                  <Tile icon={Send} label="Send" color="from-blue-500 to-blue-600" onClick={() => setView("pay")} />
+                  <Tile icon={QrCode} label="Scan" color="from-purple-500 to-fuchsia-600" onClick={() => { toast.success("📷 QR detected: Rahim @upi"); setPTo("Rahim"); setPUpi("rahim@upi"); setView("pay"); }} />
+                  <Tile icon={ArrowUpRight} label="Pay" color="from-emerald-500 to-teal-600" onClick={() => setView("pay")} />
+                  <Tile icon={Sparkles} label="More" color="from-slate-500 to-slate-700" onClick={() => toast.message("More options coming")} />
                 </div>
+
+                {/* Send Money */}
+                <h3 className="mt-5 mb-2 text-[11px] font-bold tracking-[0.12em] text-slate-400 px-1">💸 SEND MONEY TO</h3>
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 grid grid-cols-4 gap-2">
+                  <Tile icon={Smartphone} label="Mobile" color="from-emerald-500 to-teal-600" onClick={() => setView("pay")} />
+                  <Tile icon={Building2} label="Bank" color="from-violet-500 to-purple-600" onClick={() => setView("pay")} />
+                  <Tile icon={QrCode} label="UPI" color="from-pink-500 to-rose-600" onClick={() => setView("pay")} />
+                  <Tile icon={Users} label="Contacts" color="from-blue-500 to-indigo-600" onClick={() => { setPTo("Rahim"); setPUpi("rahim@upi"); setView("pay"); }} />
+                </div>
+
+                {/* Games / Rewards */}
+                <h3 className="mt-5 mb-2 text-[11px] font-bold tracking-[0.12em] text-slate-400 px-1">🎮 PLAY & EARN</h3>
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 grid grid-cols-4 gap-2">
+                  <Tile icon={Gift} label="Spin" color="from-purple-600 to-violet-700" onClick={() => { const r = 10 + Math.floor(Math.random()*90); playSuccess(); toast.success(`🎡 You won ₹${r} (offline reward)`); }} />
+                  <Tile icon={Gift} label="Scratch" color="from-emerald-600 to-green-700" onClick={() => { playSuccess(); toast.success("🪙 +₹15 cashback (offline)"); }} />
+                  <Tile icon={Gift} label="Quiz" color="from-blue-600 to-indigo-700" onClick={() => toast.message("❓ Quiz unlocks when online") } />
+                  <Tile icon={Gift} label="Lucky" color="from-rose-600 to-red-700" onClick={() => { playSuccess(); toast.success("🎁 Lucky bonus added!"); }} />
+                </div>
+
+                {/* Sync */}
+                <button onClick={tap(handleSync)} disabled={syncing} className="mt-5 w-full h-12 rounded-2xl bg-slate-800 border border-slate-700 font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition disabled:opacity-60">
+                  {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                  Sync Pending ({pendingCount})
+                </button>
 
                 {/* Connection status */}
                 <div className="mt-3 flex items-center justify-center gap-2 text-[11px]">
