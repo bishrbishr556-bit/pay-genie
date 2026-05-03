@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeft, WifiOff, Wifi, ShieldCheck, Trash2, RefreshCw, Check, Clock,
-  ArrowUpRight, Loader2, Lock,
+  ArrowUpRight, Loader2, Lock, Send, QrCode, Gift, Smartphone, Building2,
+  Users, History as HistoryIcon, Sparkles, Bell, Eye, EyeOff,
 } from "lucide-react";
 import { initOffline, useOffline, offlineActions } from "@/lib/offline-mode";
 import { playClick, playSuccess, vibrate } from "@/lib/payment-store";
 import { toast } from "sonner";
 
-type View = "main" | "setup" | "unlock" | "pay" | "processing" | "success";
+type View = "main" | "setup" | "otp" | "unlock" | "pay" | "processing" | "success";
 
 export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
   useEffect(() => { initOffline(); }, []);
@@ -25,6 +26,9 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
   const [sName, setSName] = useState("");
   const [sPhone, setSPhone] = useState("");
   const [sPin, setSPin] = useState("");
+  const [sOtp, setSOtp] = useState("");
+  const [demoOtp, setDemoOtp] = useState("");
+  const [hideBal, setHideBal] = useState(false);
 
   // unlock pin
   const [uPin, setUPin] = useState("");
@@ -61,10 +65,22 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
   const handleEnable = () => {
     if (sName.trim().length < 2) { toast.error("Enter your name"); return; }
     if (!/^\+?\d{7,15}$/.test(sPhone.replace(/\s/g, ""))) { toast.error("Enter a valid phone"); return; }
-    if (!/^\d{4}$/.test(sPin)) { toast.error("PIN must be 4 digits"); return; }
+    // Generate demo OTP and move to OTP step
+    const otp = String(Math.floor(1000 + Math.random() * 9000));
+    setDemoOtp(otp);
+    setSOtp("");
+    vibrate(15);
+    toast.success(`Demo OTP sent: ${otp}`, { duration: 6000 });
+    setView("otp");
+  };
+
+  const handleVerifyOtp = () => {
+    if (!/^\d{4}$/.test(sOtp)) { toast.error("Enter 4-digit OTP"); return; }
+    if (sOtp !== demoOtp) { toast.error("Wrong OTP"); vibrate([60,40,60]); return; }
+    if (!/^\d{4}$/.test(sPin)) { toast.error("Set a 4-digit PIN"); return; }
     offlineActions.enable({ name: sName, phone: sPhone, pin: sPin });
     playSuccess(); vibrate([20, 30, 20]);
-    setSName(""); setSPhone(""); setSPin("");
+    setSName(""); setSPhone(""); setSPin(""); setSOtp(""); setDemoOtp("");
     setAuthed(true);
     setView("main");
     toast.success("Offline mode enabled");
