@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeft, WifiOff, Wifi, ShieldCheck, Trash2, RefreshCw, Check, Clock,
-  ArrowUpRight, Loader2, Lock,
+  ArrowUpRight, Loader2, Lock, Send, QrCode, Gift, Smartphone, Building2,
+  Users, History as HistoryIcon, Sparkles, Bell, Eye, EyeOff,
 } from "lucide-react";
 import { initOffline, useOffline, offlineActions } from "@/lib/offline-mode";
 import { playClick, playSuccess, vibrate } from "@/lib/payment-store";
 import { toast } from "sonner";
 
-type View = "main" | "setup" | "unlock" | "pay" | "processing" | "success";
+type View = "main" | "setup" | "otp" | "unlock" | "pay" | "processing" | "success";
 
 export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
   useEffect(() => { initOffline(); }, []);
@@ -25,6 +26,9 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
   const [sName, setSName] = useState("");
   const [sPhone, setSPhone] = useState("");
   const [sPin, setSPin] = useState("");
+  const [sOtp, setSOtp] = useState("");
+  const [demoOtp, setDemoOtp] = useState("");
+  const [hideBal, setHideBal] = useState(false);
 
   // unlock pin
   const [uPin, setUPin] = useState("");
@@ -61,10 +65,22 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
   const handleEnable = () => {
     if (sName.trim().length < 2) { toast.error("Enter your name"); return; }
     if (!/^\+?\d{7,15}$/.test(sPhone.replace(/\s/g, ""))) { toast.error("Enter a valid phone"); return; }
-    if (!/^\d{4}$/.test(sPin)) { toast.error("PIN must be 4 digits"); return; }
+    // Generate demo OTP and move to OTP step
+    const otp = String(Math.floor(1000 + Math.random() * 9000));
+    setDemoOtp(otp);
+    setSOtp("");
+    vibrate(15);
+    toast.success(`Demo OTP sent: ${otp}`, { duration: 6000 });
+    setView("otp");
+  };
+
+  const handleVerifyOtp = () => {
+    if (!/^\d{4}$/.test(sOtp)) { toast.error("Enter 4-digit OTP"); return; }
+    if (sOtp !== demoOtp) { toast.error("Wrong OTP"); vibrate([60,40,60]); return; }
+    if (!/^\d{4}$/.test(sPin)) { toast.error("Set a 4-digit PIN"); return; }
     offlineActions.enable({ name: sName, phone: sPhone, pin: sPin });
     playSuccess(); vibrate([20, 30, 20]);
-    setSName(""); setSPhone(""); setSPin("");
+    setSName(""); setSPhone(""); setSPin(""); setSOtp(""); setDemoOtp("");
     setAuthed(true);
     setView("main");
     toast.success("Offline mode enabled");
@@ -150,9 +166,28 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
             </div>
 
             <button onClick={tap(handleEnable)} className="mt-5 w-full h-12 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 font-bold active:scale-[0.98] transition shadow-lg shadow-orange-900/40">
-              Enable Offline Mode
+              Send OTP
             </button>
             <button onClick={tap(() => setView("main"))} className="mt-2 w-full h-10 rounded-xl text-slate-400 text-sm">Cancel</button>
+          </motion.div>
+        )}
+
+        {/* OTP */}
+        {view === "otp" && (
+          <motion.div key="otp" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="px-4 pt-3">
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 mb-4 text-center">
+              <p className="text-xs text-slate-300">Demo OTP sent to <b>{sPhone}</b></p>
+              <p className="text-2xl font-bold tracking-[0.4em] text-emerald-400 mt-1">{demoOtp}</p>
+              <p className="text-[10px] text-slate-500 mt-1">(Auto-shown for demo only)</p>
+            </div>
+            <Field label="Enter 4-digit OTP">
+              <input value={sOtp} onChange={(e) => setSOtp(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" placeholder="••••" className="w-full h-12 px-3 rounded-xl bg-slate-900 border border-slate-700 text-lg outline-none focus:border-emerald-500 tracking-[0.6em] text-center" />
+            </Field>
+            <button onClick={tap(handleVerifyOtp)} disabled={sOtp.length !== 4} className="mt-5 w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 font-bold active:scale-[0.98] transition disabled:opacity-50">
+              Verify & Continue
+            </button>
+            <button onClick={tap(() => { const o = String(Math.floor(1000+Math.random()*9000)); setDemoOtp(o); toast.success(`New OTP: ${o}`); })} className="mt-2 w-full h-10 rounded-xl text-slate-400 text-sm">Resend OTP</button>
+            <button onClick={tap(() => setView("setup"))} className="mt-1 w-full h-10 rounded-xl text-slate-500 text-xs">Back</button>
           </motion.div>
         )}
 
@@ -245,6 +280,27 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
 
             {enabled && (
               <>
+                {/* Demo balance card (clone of home) */}
+                <div className="mt-4 relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 text-white shadow-lg">
+                  <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/15 blur-xl" />
+                  <div className="relative flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 text-[11px] opacity-90">
+                        <span>Demo Balance</span>
+                        <button onClick={tap(() => setHideBal((v) => !v))} className="opacity-90">
+                          {hideBal ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                        </button>
+                      </div>
+                      <p className="text-3xl font-bold mt-1">{hideBal ? "₹ ••••••" : "₹5,000.00"}</p>
+                      <p className="text-[10px] opacity-80 mt-0.5">A/C ••••0000 · Offline Wallet</p>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-[10px] bg-white/20 backdrop-blur px-2 py-1 rounded-full">
+                      <WifiOff className="h-3 w-3" /> Offline
+                    </span>
+                  </div>
+                  <p className="relative text-[10px] mt-3 bg-white/15 rounded-full px-2 py-1 inline-block">📡 Offline Mode Active · all txns pending sync</p>
+                </div>
+
                 {/* Profile */}
                 <div className="mt-4 bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center font-bold">
@@ -259,16 +315,38 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
                   </span>
                 </div>
 
-                {/* Actions */}
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <button onClick={tap(() => setView("pay"))} className="h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition">
-                    <ArrowUpRight className="h-4 w-4" /> Offline Pay
-                  </button>
-                  <button onClick={tap(handleSync)} disabled={syncing} className="h-14 rounded-2xl bg-slate-800 border border-slate-700 font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition disabled:opacity-60">
-                    {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                    Sync ({pendingCount})
-                  </button>
+                {/* Quick Actions */}
+                <h3 className="mt-5 mb-2 text-[11px] font-bold tracking-[0.12em] text-slate-400 px-1">⚡ QUICK ACTIONS</h3>
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 grid grid-cols-4 gap-2">
+                  <Tile icon={Send} label="Send" color="from-blue-500 to-blue-600" onClick={() => setView("pay")} />
+                  <Tile icon={QrCode} label="Scan" color="from-purple-500 to-fuchsia-600" onClick={() => { toast.success("📷 QR detected: Rahim @upi"); setPTo("Rahim"); setPUpi("rahim@upi"); setView("pay"); }} />
+                  <Tile icon={ArrowUpRight} label="Pay" color="from-emerald-500 to-teal-600" onClick={() => setView("pay")} />
+                  <Tile icon={Sparkles} label="More" color="from-slate-500 to-slate-700" onClick={() => toast.message("More options coming")} />
                 </div>
+
+                {/* Send Money */}
+                <h3 className="mt-5 mb-2 text-[11px] font-bold tracking-[0.12em] text-slate-400 px-1">💸 SEND MONEY TO</h3>
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 grid grid-cols-4 gap-2">
+                  <Tile icon={Smartphone} label="Mobile" color="from-emerald-500 to-teal-600" onClick={() => setView("pay")} />
+                  <Tile icon={Building2} label="Bank" color="from-violet-500 to-purple-600" onClick={() => setView("pay")} />
+                  <Tile icon={QrCode} label="UPI" color="from-pink-500 to-rose-600" onClick={() => setView("pay")} />
+                  <Tile icon={Users} label="Contacts" color="from-blue-500 to-indigo-600" onClick={() => { setPTo("Rahim"); setPUpi("rahim@upi"); setView("pay"); }} />
+                </div>
+
+                {/* Games / Rewards */}
+                <h3 className="mt-5 mb-2 text-[11px] font-bold tracking-[0.12em] text-slate-400 px-1">🎮 PLAY & EARN</h3>
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 grid grid-cols-4 gap-2">
+                  <Tile icon={Gift} label="Spin" color="from-purple-600 to-violet-700" onClick={() => { const r = 10 + Math.floor(Math.random()*90); playSuccess(); toast.success(`🎡 You won ₹${r} (offline reward)`); }} />
+                  <Tile icon={Gift} label="Scratch" color="from-emerald-600 to-green-700" onClick={() => { playSuccess(); toast.success("🪙 +₹15 cashback (offline)"); }} />
+                  <Tile icon={Gift} label="Quiz" color="from-blue-600 to-indigo-700" onClick={() => toast.message("❓ Quiz unlocks when online") } />
+                  <Tile icon={Gift} label="Lucky" color="from-rose-600 to-red-700" onClick={() => { playSuccess(); toast.success("🎁 Lucky bonus added!"); }} />
+                </div>
+
+                {/* Sync */}
+                <button onClick={tap(handleSync)} disabled={syncing} className="mt-5 w-full h-12 rounded-2xl bg-slate-800 border border-slate-700 font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition disabled:opacity-60">
+                  {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                  Sync Pending ({pendingCount})
+                </button>
 
                 {/* Connection status */}
                 <div className="mt-3 flex items-center justify-center gap-2 text-[11px]">
@@ -338,6 +416,17 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="block text-[11px] font-semibold text-slate-400 mb-1.5 px-1">{label}</span>
       {children}
     </label>
+  );
+}
+
+function Tile({ icon: Icon, label, color, onClick }: { icon: any; label: string; color: string; onClick: () => void }) {
+  return (
+    <button onClick={() => { playClick(); vibrate(10); onClick(); }} className="flex flex-col items-center gap-1.5 p-2 rounded-xl active:scale-90 transition">
+      <div className={`h-11 w-11 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center shadow-md`}>
+        <Icon className="h-5 w-5 text-white" />
+      </div>
+      <span className="text-[10px] text-slate-300 font-medium">{label}</span>
+    </button>
   );
 }
 
