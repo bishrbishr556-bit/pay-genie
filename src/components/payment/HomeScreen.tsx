@@ -186,6 +186,25 @@ export function HomeScreen({
 
       {/* Pending Bills widget */}
       <div className="px-5 mt-4">
+        {/* Offline Mode banner */}
+        <button
+          onClick={() => { playClick(); vibrate(15); onPickMore("offline"); }}
+          className="w-full mb-3 relative overflow-hidden rounded-2xl p-4 text-left shadow-card active:scale-[0.98] transition-transform
+                     bg-gradient-to-br from-orange-500 via-red-500 to-rose-600 text-white"
+        >
+          <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/20 blur-xl" />
+          <div className="relative flex items-center gap-3">
+            <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
+              <WifiOff className="h-6 w-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm">📡 Offline Mode</p>
+              <p className="text-[11px] opacity-90">Use the app without internet · pay & sync later</p>
+            </div>
+            <span className="bg-white text-orange-600 text-[11px] font-bold px-3 py-1.5 rounded-full">Open</span>
+          </div>
+        </button>
+
         <div className="bg-card rounded-2xl shadow-card p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold flex items-center gap-1.5"><Receipt className="h-4 w-4" /> Pending Bills</h3>
