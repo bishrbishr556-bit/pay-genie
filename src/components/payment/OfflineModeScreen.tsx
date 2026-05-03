@@ -166,9 +166,28 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
             </div>
 
             <button onClick={tap(handleEnable)} className="mt-5 w-full h-12 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 font-bold active:scale-[0.98] transition shadow-lg shadow-orange-900/40">
-              Enable Offline Mode
+              Send OTP
             </button>
             <button onClick={tap(() => setView("main"))} className="mt-2 w-full h-10 rounded-xl text-slate-400 text-sm">Cancel</button>
+          </motion.div>
+        )}
+
+        {/* OTP */}
+        {view === "otp" && (
+          <motion.div key="otp" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="px-4 pt-3">
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 mb-4 text-center">
+              <p className="text-xs text-slate-300">Demo OTP sent to <b>{sPhone}</b></p>
+              <p className="text-2xl font-bold tracking-[0.4em] text-emerald-400 mt-1">{demoOtp}</p>
+              <p className="text-[10px] text-slate-500 mt-1">(Auto-shown for demo only)</p>
+            </div>
+            <Field label="Enter 4-digit OTP">
+              <input value={sOtp} onChange={(e) => setSOtp(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" placeholder="••••" className="w-full h-12 px-3 rounded-xl bg-slate-900 border border-slate-700 text-lg outline-none focus:border-emerald-500 tracking-[0.6em] text-center" />
+            </Field>
+            <button onClick={tap(handleVerifyOtp)} disabled={sOtp.length !== 4} className="mt-5 w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 font-bold active:scale-[0.98] transition disabled:opacity-50">
+              Verify & Continue
+            </button>
+            <button onClick={tap(() => { const o = String(Math.floor(1000+Math.random()*9000)); setDemoOtp(o); toast.success(`New OTP: ${o}`); })} className="mt-2 w-full h-10 rounded-xl text-slate-400 text-sm">Resend OTP</button>
+            <button onClick={tap(() => setView("setup"))} className="mt-1 w-full h-10 rounded-xl text-slate-500 text-xs">Back</button>
           </motion.div>
         )}
 
