@@ -11,6 +11,9 @@ import { ProfileScreen } from "@/components/payment/ProfileScreen";
 import { MerchantScreen } from "@/components/payment/MerchantScreen";
 import { ScannerScreen } from "@/components/payment/ScannerScreen";
 import { LockScreen } from "@/components/payment/LockScreen";
+import { SecureLockScreen } from "@/components/payment/SecureLockScreen";
+import { SecuritySetupScreen } from "@/components/payment/SecuritySetupScreen";
+import { initSecurity, useSecurity } from "@/lib/security-store";
 import { SettingsDetailScreen } from "@/components/payment/SettingsDetailScreen";
 import { FeatureScreen } from "@/components/payment/FeatureScreen";
 import { RechargeScreen, type RechargeKind } from "@/components/payment/RechargeScreen";
@@ -109,9 +112,11 @@ function Index() {
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [openRewardId, setOpenRewardId] = useState<string | null>(null);
   const unlocked = useStore((s) => s.unlocked);
+  const setupComplete = useSecurity((s) => s.setupComplete);
 
   useEffect(() => {
     initStore();
+    initSecurity();
     const dark = localStorage.getItem("theme") === "dark";
     if (dark) document.documentElement.classList.add("dark");
     setOnline(navigator.onLine);
@@ -255,7 +260,7 @@ function Index() {
   if (!unlocked) {
     return (
       <PhoneFrame>
-        <LockScreen />
+        {setupComplete ? <SecureLockScreen /> : <SecuritySetupScreen />}
         <Toaster position="top-center" />
       </PhoneFrame>
     );
