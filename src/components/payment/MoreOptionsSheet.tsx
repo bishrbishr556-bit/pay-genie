@@ -30,7 +30,15 @@ export type MoreOptionId =
   | "gold-investment" | "loan-repayment"
   | "rewards" | "coupons" | "cashback-points" | "vip-benefits"
   | "charity" | "education" | "hospital" | "flight" | "bus" | "hotel"
-  | "biometric" | "logout" | "feedback";
+  | "biometric" | "logout" | "feedback"
+  // New Bank & Account features
+  | "link-account" | "mini-statement" | "upi-settings" | "default-account" | "account-switch"
+  // New Advanced Payment features
+  | "bulk-payment" | "payment-link" | "pay-nearby" | "tap-to-pay" | "scheduled-pay" | "auto-pay" | "auto-collect"
+  // New Communication features
+  | "chat" | "voice-call" | "video-call" | "group-chat"
+  // New Social features
+  | "favorites" | "share-app";
 
 type Item = { id: MoreOptionId; label: string; icon: LucideIcon; color: string };
 type Section = { title: string; accent: string; items: Item[] };

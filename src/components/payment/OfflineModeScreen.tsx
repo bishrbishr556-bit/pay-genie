@@ -311,20 +311,34 @@ export function OfflineModeScreen({ onBack }: { onBack: () => void }) {
                 {/* Demo balance card (clone of home) */}
                 <div className="mt-4 relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 text-white shadow-lg">
                   <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/15 blur-xl" />
-                  <div className="relative flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 text-[11px] opacity-90">
-                        <span>Demo Balance</span>
-                        <button onClick={tap(() => setHideBal((v) => !v))} className="opacity-90">
-                          {hideBal ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                        </button>
-                      </div>
-                      <p className="text-3xl font-bold mt-1">{hideBal ? "₹ ••••••" : "₹5,000.00"}</p>
-                      <p className="text-[10px] opacity-80 mt-0.5">A/C ••••0000 · Offline Wallet</p>
+                  <div className="absolute -left-6 -bottom-6 h-20 w-20 rounded-full bg-white/10 blur-xl" />
+                  
+                  {/* User greeting */}
+                  <div className="relative flex items-center gap-2 mb-3">
+                    <div className="h-8 w-8 rounded-full bg-white/20 backdrop-blur flex items-center justify-center font-bold text-sm">
+                      {(profile?.name || "U").charAt(0).toUpperCase()}
                     </div>
-                    <span className="inline-flex items-center gap-1 text-[10px] bg-white/20 backdrop-blur px-2 py-1 rounded-full">
-                      <WifiOff className="h-3 w-3" /> Offline
-                    </span>
+                    <div>
+                      <p className="text-[10px] opacity-80">Hello,</p>
+                      <p className="font-semibold text-sm">{profile?.name || "User"}</p>
+                    </div>
+                    <div className="ml-auto flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1 text-[10px] bg-white/20 backdrop-blur px-2 py-1 rounded-full">
+                        <WifiOff className="h-3 w-3" /> Offline
+                      </span>
+                      <Bell className="h-4 w-4 opacity-80" />
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <div className="flex items-center gap-2 text-[11px] opacity-90">
+                      <span>Demo Balance</span>
+                      <button onClick={tap(() => setHideBal((v) => !v))} className="opacity-90">
+                        {hideBal ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                      </button>
+                    </div>
+                    <p className="text-3xl font-bold mt-1">{hideBal ? "₹ ••••••" : "₹5,000.00"}</p>
+                    <p className="text-[10px] opacity-80 mt-0.5">A/C ••••0000 · Offline Wallet</p>
                   </div>
                   <p className="relative text-[10px] mt-3 bg-white/15 rounded-full px-2 py-1 inline-block">📡 Offline Mode Active · all txns pending sync</p>
                 </div>

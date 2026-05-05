@@ -19,6 +19,30 @@ import { SplitBillScreen } from "@/components/payment/SplitBillScreen";
 import { GamesScreen } from "@/components/payment/GamesScreen";
 import { AllServicesScreen } from "@/components/payment/AllServicesScreen";
 import { OfflineModeScreen } from "@/components/payment/OfflineModeScreen";
+import { BankAccountScreen } from "@/components/payment/BankAccountScreen";
+import { ChatScreen } from "@/components/payment/ChatScreen";
+import { SplitBillScreenNew } from "@/components/payment/SplitBillScreenNew";
+import { SplitBillSimpleScreen } from "@/components/payment/SplitBillSimpleScreen";
+import { GenericFeatureScreen } from "@/components/payment/GenericFeatureScreen";
+import { BalanceScreen } from "@/components/payment/BalanceScreen";
+import { StatementScreen } from "@/components/payment/StatementScreen";
+import { UpiSettingsScreen } from "@/components/payment/UpiSettingsScreen";
+import { NearbyScreen } from "@/components/payment/NearbyScreen";
+import { TapToPayScreen } from "@/components/payment/TapToPayScreen";
+import { SchedulePaymentScreen } from "@/components/payment/SchedulePaymentScreen";
+import { AutoPayScreen } from "@/components/payment/AutoPayScreen";
+import { BulkPayScreen } from "@/components/payment/BulkPayScreen";
+import { GroupCreateScreen } from "@/components/payment/GroupCreateScreen";
+import { GroupChatScreen } from "@/components/payment/GroupChatScreen";
+import { ChatListScreen } from "@/components/payment/ChatListScreen";
+import { VoiceCallScreen } from "@/components/payment/VoiceCallScreen";
+import { VideoCallScreen } from "@/components/payment/VideoCallScreen";
+import { ContactsScreen } from "@/components/payment/ContactsScreen";
+import { FavoritesScreen } from "@/components/payment/FavoritesScreen";
+import { RecentContactsScreen } from "@/components/payment/RecentContactsScreen";
+import { InviteScreen } from "@/components/payment/InviteScreen";
+import { ReferralScreen } from "@/components/payment/ReferralScreen";
+import { ShareScreen } from "@/components/payment/ShareScreen";
 import type { MoreOptionId } from "@/components/payment/MoreOptionsSheet";
 import { actions } from "@/lib/payment-store";
 import { toast } from "sonner";
@@ -58,6 +82,29 @@ function Index() {
   const [games, setGames] = useState(false);
   const [allServices, setAllServices] = useState(false);
   const [offlineScreen, setOfflineScreen] = useState(false);
+  const [bankAccountScreen, setBankAccountScreen] = useState(false);
+  const [chatScreen, setChatScreen] = useState(false);
+  const [splitBillNewScreen, setSplitBillNewScreen] = useState(false);
+  const [genericFeatureScreen, setGenericFeatureScreen] = useState<string | null>(null);
+  const [balanceScreen, setBalanceScreen] = useState(false);
+  const [statementScreen, setStatementScreen] = useState(false);
+  const [upiSettingsScreen, setUpiSettingsScreen] = useState(false);
+  const [nearbyScreen, setNearbyScreen] = useState(false);
+  const [tapToPayScreen, setTapToPayScreen] = useState(false);
+  const [schedulePaymentScreen, setSchedulePaymentScreen] = useState(false);
+  const [autoPayScreen, setAutoPayScreen] = useState(false);
+  const [bulkPayScreen, setBulkPayScreen] = useState(false);
+  const [groupCreateScreen, setGroupCreateScreen] = useState(false);
+  const [groupChatScreen, setGroupChatScreen] = useState(false);
+  const [chatListScreen, setChatListScreen] = useState(false);
+  const [voiceCallScreen, setVoiceCallScreen] = useState(false);
+  const [videoCallScreen, setVideoCallScreen] = useState(false);
+  const [contactsScreen, setContactsScreen] = useState(false);
+  const [favoritesScreen, setFavoritesScreen] = useState(false);
+  const [recentScreen, setRecentScreen] = useState(false);
+  const [inviteScreen, setInviteScreen] = useState(false);
+  const [referralScreen, setReferralScreen] = useState(false);
+  const [shareScreen, setShareScreen] = useState(false);
   const [online, setOnline] = useState(true);
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [openRewardId, setOpenRewardId] = useState<string | null>(null);
@@ -149,8 +196,59 @@ function Index() {
     }
     if (id === "merchant") { setOverlay("merchant"); return; }
     if (id === "voice-pay") { setVoicePay(true); return; }
-    if (id === "split-bill") { setSplitBill(true); return; }
+    if (id === "split-bill") { setSplitBillNewScreen(true); return; }
     if (id === "offline") { setOfflineScreen(true); return; }
+    
+    // Bank features - Dedicated screens
+    if (id === "add-bank" || id === "link-account") { setBankAccountScreen(true); return; }
+    if (id === "check-balance") { setBalanceScreen(true); return; }
+    if (id === "mini-statement") { setStatementScreen(true); return; }
+    if (id === "upi-settings") { setUpiSettingsScreen(true); return; }
+    
+    // Bank features - Generic screen for remaining
+    if (id === "upi-id" || id === "default-account" || id === "account-switch") {
+      setGenericFeatureScreen(id);
+      return;
+    }
+    
+    // Advanced payment features
+    if (id === "split-bill") { setSplitBillNewScreen(true); return; }
+    if (id === "pay-nearby") { setNearbyScreen(true); return; }
+    if (id === "tap-to-pay") { setTapToPayScreen(true); return; }
+    if (id === "scheduled-pay") { setSchedulePaymentScreen(true); return; }
+    if (id === "auto-pay") { setAutoPayScreen(true); return; }
+    if (id === "bulk-payment") { setBulkPayScreen(true); return; }
+    if (id === "payment-link" || id === "auto-collect") {
+      setGenericFeatureScreen(id);
+      return;
+    }
+    
+    // Communication features
+    if (id === "chat") { 
+      setChatListScreen(true); 
+      return; 
+    }
+    if (id === "voice-call") { 
+      setVoiceCallScreen(true); 
+      return; 
+    }
+    if (id === "video-call") { 
+      setVideoCallScreen(true); 
+      return; 
+    }
+    if (id === "group-chat") { 
+      setGroupChatScreen(true); 
+      return; 
+    }
+    
+    // Contact & Social features
+    if (id === "pay-contact") { setContactsScreen(true); return; }
+    if (id === "favorites") { setFavoritesScreen(true); return; }
+    if (id === "recent") { setRecentScreen(true); return; }
+    if (id === "invite") { setInviteScreen(true); return; }
+    if (id === "refer") { setReferralScreen(true); return; }
+    if (id === "share-app") { setShareScreen(true); return; }
+    
     setMoreOpt(id);
   };
 
@@ -182,6 +280,98 @@ function Index() {
         {offlineScreen ? (
           <motion.div key="off" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
             <OfflineModeScreen onBack={() => setOfflineScreen(false)} />
+          </motion.div>
+        ) : genericFeatureScreen ? (
+          <motion.div key="generic" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <GenericFeatureScreen featureId={genericFeatureScreen} onBack={() => setGenericFeatureScreen(null)} />
+          </motion.div>
+        ) : bankAccountScreen ? (
+          <motion.div key="bank" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <BankAccountScreen onBack={() => setBankAccountScreen(false)} />
+          </motion.div>
+        ) : chatScreen ? (
+          <motion.div key="chat" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <ChatScreen onBack={() => setChatScreen(false)} />
+          </motion.div>
+        ) : splitBillNewScreen ? (
+          <motion.div key="splitnew" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <SplitBillSimpleScreen onBack={() => setSplitBillNewScreen(false)} />
+          </motion.div>
+        ) : balanceScreen ? (
+          <motion.div key="balance" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <BalanceScreen onBack={() => setBalanceScreen(false)} />
+          </motion.div>
+        ) : statementScreen ? (
+          <motion.div key="statement" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <StatementScreen onBack={() => setStatementScreen(false)} />
+          </motion.div>
+        ) : upiSettingsScreen ? (
+          <motion.div key="upisettings" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <UpiSettingsScreen onBack={() => setUpiSettingsScreen(false)} />
+          </motion.div>
+        ) : nearbyScreen ? (
+          <motion.div key="nearby" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <NearbyScreen onBack={() => setNearbyScreen(false)} />
+          </motion.div>
+        ) : tapToPayScreen ? (
+          <motion.div key="taptopay" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <TapToPayScreen onBack={() => setTapToPayScreen(false)} />
+          </motion.div>
+        ) : schedulePaymentScreen ? (
+          <motion.div key="schedule" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <SchedulePaymentScreen onBack={() => setSchedulePaymentScreen(false)} />
+          </motion.div>
+        ) : autoPayScreen ? (
+          <motion.div key="autopay" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <AutoPayScreen onBack={() => setAutoPayScreen(false)} />
+          </motion.div>
+        ) : bulkPayScreen ? (
+          <motion.div key="bulkpay" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <BulkPayScreen onBack={() => setBulkPayScreen(false)} />
+          </motion.div>
+        ) : groupCreateScreen ? (
+          <motion.div key="groupcreate" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <GroupCreateScreen onBack={() => setGroupCreateScreen(false)} />
+          </motion.div>
+        ) : groupChatScreen ? (
+          <motion.div key="groupchat" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <GroupChatScreen onBack={() => setGroupChatScreen(false)} />
+          </motion.div>
+        ) : chatListScreen ? (
+          <motion.div key="chatlist" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <ChatListScreen onBack={() => setChatListScreen(false)} onOpenChat={() => { setChatListScreen(false); setChatScreen(true); }} />
+          </motion.div>
+        ) : voiceCallScreen ? (
+          <motion.div key="voicecall" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="absolute inset-0 z-30">
+            <VoiceCallScreen onBack={() => setVoiceCallScreen(false)} />
+          </motion.div>
+        ) : videoCallScreen ? (
+          <motion.div key="videocall" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="absolute inset-0 z-30">
+            <VideoCallScreen onBack={() => setVideoCallScreen(false)} />
+          </motion.div>
+        ) : contactsScreen ? (
+          <motion.div key="contacts" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <ContactsScreen onBack={() => setContactsScreen(false)} />
+          </motion.div>
+        ) : favoritesScreen ? (
+          <motion.div key="favorites" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <FavoritesScreen onBack={() => setFavoritesScreen(false)} />
+          </motion.div>
+        ) : recentScreen ? (
+          <motion.div key="recent" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <RecentContactsScreen onBack={() => setRecentScreen(false)} />
+          </motion.div>
+        ) : inviteScreen ? (
+          <motion.div key="invite" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <InviteScreen onBack={() => setInviteScreen(false)} />
+          </motion.div>
+        ) : referralScreen ? (
+          <motion.div key="referral" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <ReferralScreen onBack={() => setReferralScreen(false)} />
+          </motion.div>
+        ) : shareScreen ? (
+          <motion.div key="share" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
+            <ShareScreen onBack={() => setShareScreen(false)} />
           </motion.div>
         ) : allServices ? (
           <motion.div key="all" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0 z-30">
@@ -253,7 +443,40 @@ function Index() {
         )}
       </AnimatePresence>
 
-      <BottomNav active={tab} onChange={(t) => { setOverlay(null); setMoreOpt(null); setRechargeKind(null); setVoicePay(false); setSplitBill(false); setGames(false); setAllServices(false); setOfflineScreen(false); setTab(t); }} />
+      <BottomNav active={tab} onChange={(t) => { 
+        setOverlay(null); 
+        setMoreOpt(null); 
+        setRechargeKind(null); 
+        setVoicePay(false); 
+        setSplitBill(false); 
+        setGames(false); 
+        setAllServices(false); 
+        setOfflineScreen(false); 
+        setBankAccountScreen(false); 
+        setChatScreen(false); 
+        setSplitBillNewScreen(false); 
+        setGenericFeatureScreen(null); 
+        setBalanceScreen(false);
+        setStatementScreen(false);
+        setUpiSettingsScreen(false);
+        setNearbyScreen(false);
+        setTapToPayScreen(false);
+        setSchedulePaymentScreen(false);
+        setAutoPayScreen(false);
+        setBulkPayScreen(false);
+        setGroupCreateScreen(false);
+        setGroupChatScreen(false);
+        setChatListScreen(false);
+        setVoiceCallScreen(false);
+        setVideoCallScreen(false);
+        setContactsScreen(false);
+        setFavoritesScreen(false);
+        setRecentScreen(false);
+        setInviteScreen(false);
+        setReferralScreen(false);
+        setShareScreen(false);
+        setTab(t); 
+      }} />
       <Toaster position="top-center" />
     </PhoneFrame>
   );

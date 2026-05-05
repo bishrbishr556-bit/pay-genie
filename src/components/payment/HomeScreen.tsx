@@ -7,6 +7,8 @@ import {
   ShieldCheck, BarChart3, Bot, Mic, Receipt,
   Building2, AtSign, UserCheck, UsersRound, Gift, BadgePercent,
   CreditCard, Gauge, ShieldPlus, Plane, Ticket,
+  Link, Repeat, MapPin, Nfc, Calendar, DollarSign, Wallet, Settings,
+  Phone, Video, MessageCircle, UserPlus, Share2, Star, CheckCircle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Tab } from "./BottomNav";
@@ -294,6 +296,83 @@ export function HomeScreen({
         </div>
       </div>
 
+      {/* Bank & Account Management */}
+      <div className="px-5 mt-5">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold flex items-center gap-1.5"><Building2 className="h-4 w-4" /> Bank & Account</h3>
+          <button onClick={() => { playClick(); onPickMore("add-bank"); }} className="text-[11px] text-primary font-semibold flex items-center">Manage <ChevronRight className="h-3 w-3" /></button>
+        </div>
+        <div className="bg-card rounded-2xl shadow-card p-4 grid grid-cols-4 gap-3">
+          <QuickAction icon={Plus}        label="Add Bank"    color="from-emerald-500 to-teal-600"   onClick={() => onPickMore("add-bank")} />
+          <QuickAction icon={Link}        label="Link A/C"    color="from-blue-500 to-indigo-600"    onClick={() => onPickMore("link-account")} />
+          <QuickAction icon={Wallet}      label="Balance"     color="from-violet-500 to-purple-600"  onClick={() => onPickMore("check-balance")} />
+          <QuickAction icon={Receipt}     label="Statement"   color="from-pink-500 to-rose-600"      onClick={() => onPickMore("mini-statement")} />
+          <QuickAction icon={Settings}    label="UPI Set"     color="from-amber-500 to-orange-600"   onClick={() => onPickMore("upi-settings")} />
+          <QuickAction icon={AtSign}      label="Manage ID"   color="from-cyan-500 to-sky-600"       onClick={() => onPickMore("upi-id")} />
+          <QuickAction icon={CheckCircle} label="Default"     color="from-emerald-500 to-green-600"  onClick={() => onPickMore("default-account")} />
+          <QuickAction icon={Repeat}      label="Switch"      color="from-rose-500 to-red-600"       onClick={() => onPickMore("account-switch")} />
+        </div>
+      </div>
+
+      {/* Advanced Payment Features */}
+      <div className="px-5 mt-5">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold flex items-center gap-1.5"><Sparkles className="h-4 w-4" /> Advanced Features</h3>
+          <button onClick={() => { playClick(); }} className="text-[11px] text-primary font-semibold flex items-center">More <ChevronRight className="h-3 w-3" /></button>
+        </div>
+        <div className="bg-card rounded-2xl shadow-card p-4 grid grid-cols-4 gap-3">
+          <QuickAction icon={UsersRound} label="Split Bill"  color="from-purple-500 to-fuchsia-600" onClick={() => onPickMore("split-bill")} />
+          <QuickAction icon={Repeat}     label="Bulk Pay"    color="from-blue-500 to-indigo-600"    onClick={() => onPickMore("bulk-payment")} />
+          <QuickAction icon={Link}       label="Pay Link"    color="from-emerald-500 to-teal-600"   onClick={() => onPickMore("payment-link")} />
+          <QuickAction icon={MapPin}     label="Nearby"      color="from-rose-500 to-pink-600"      onClick={() => onPickMore("pay-nearby")} />
+          <QuickAction icon={Nfc}        label="Tap Pay"     color="from-amber-500 to-orange-600"   onClick={() => onPickMore("tap-to-pay")} />
+          <QuickAction icon={Calendar}   label="Schedule"    color="from-violet-500 to-purple-600"  onClick={() => onPickMore("scheduled-pay")} />
+          <QuickAction icon={DollarSign} label="Auto Pay"    color="from-cyan-500 to-sky-600"       onClick={() => onPickMore("auto-pay")} />
+          <QuickAction icon={Wallet}     label="Collect"     color="from-indigo-500 to-blue-600"    onClick={() => onPickMore("auto-collect")} />
+        </div>
+      </div>
+
+      {/* Communication Hub */}
+      <div className="px-5 mt-5">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold flex items-center gap-1.5"><MessageCircle className="h-4 w-4" /> Chat & Connect</h3>
+          <button onClick={() => { playClick(); onPickMore("chat"); }} className="text-[11px] text-primary font-semibold flex items-center">Open <ChevronRight className="h-3 w-3" /></button>
+        </div>
+        
+        {/* Mini Chat Preview */}
+        <div className="bg-card rounded-2xl shadow-card p-4 mb-3">
+          <div className="space-y-2">
+            <ChatPreview name="Rahim" message="₹500 sent ✔" time="2m" avatar="R" color="from-emerald-500 to-teal-600" onClick={() => onPickMore("chat")} />
+            <ChatPreview name="Anas" message="Hi bro" time="5m" avatar="A" color="from-blue-500 to-indigo-600" onClick={() => onPickMore("chat")} />
+            <ChatPreview name="Fasil" message="Request ₹200" time="10m" avatar="F" color="from-purple-500 to-fuchsia-600" onClick={() => onPickMore("chat")} />
+          </div>
+        </div>
+
+        {/* Communication Actions */}
+        <div className="bg-card rounded-2xl shadow-card p-4 grid grid-cols-4 gap-3">
+          <QuickAction icon={MessageCircle} label="Chat"      color="from-blue-500 to-indigo-600"    onClick={() => onPickMore("chat")} />
+          <QuickAction icon={Phone}         label="Call"      color="from-emerald-500 to-teal-600"   onClick={() => onPickMore("voice-call")} />
+          <QuickAction icon={Video}         label="Video"     color="from-purple-500 to-fuchsia-600" onClick={() => onPickMore("video-call")} />
+          <QuickAction icon={UsersRound}    label="Group"     color="from-rose-500 to-pink-600"      onClick={() => onPickMore("group-chat")} />
+        </div>
+      </div>
+
+      {/* Contact & Social */}
+      <div className="px-5 mt-5">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold flex items-center gap-1.5"><Users className="h-4 w-4" /> Contact & Social</h3>
+          <button onClick={() => { playClick(); onPickMore("pay-contact"); }} className="text-[11px] text-primary font-semibold flex items-center">All <ChevronRight className="h-3 w-3" /></button>
+        </div>
+        <div className="bg-card rounded-2xl shadow-card p-4 grid grid-cols-4 gap-3">
+          <QuickAction icon={Users}      label="Contacts"  color="from-blue-500 to-indigo-600"    onClick={() => onPickMore("pay-contact")} />
+          <QuickAction icon={Star}       label="Favorites" color="from-amber-500 to-orange-600"   onClick={() => onPickMore("favorites")} />
+          <QuickAction icon={History}    label="Recent"    color="from-emerald-500 to-teal-600"   onClick={() => onNavigate("history")} />
+          <QuickAction icon={UserPlus}   label="Invite"    color="from-purple-500 to-fuchsia-600" onClick={() => onPickMore("refer")} />
+          <QuickAction icon={Gift}       label="Referral"  color="from-rose-500 to-pink-600"      onClick={() => onPickMore("refer")} />
+          <QuickAction icon={Share2}     label="Share"     color="from-cyan-500 to-sky-600"       onClick={() => onPickMore("share-app")} />
+        </div>
+      </div>
+
       {/* Offers For You */}
       <div className="px-5 mt-5">
         <div className="flex items-center justify-between mb-2">
@@ -392,16 +471,33 @@ export function HomeScreen({
 
       {/* Install banner */}
       {canInstall && (
-        <div className="mx-5 mt-4 gradient-reward text-white rounded-2xl p-4 flex items-center justify-between shadow-card">
-          <div>
-            <p className="font-semibold text-sm">Install App</p>
-            <p className="text-xs opacity-90">Add to home screen for native experience</p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mx-4 mt-4"
+        >
+          <div className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 rounded-3xl p-6 shadow-2xl shadow-purple-900/40">
+            <div className="text-center mb-4">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="inline-block mb-3"
+              >
+                <div className="h-16 w-16 mx-auto rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
+                  <FileDown className="h-8 w-8 text-white" strokeWidth={2.5} />
+                </div>
+              </motion.div>
+              <h3 className="text-xl font-bold text-white mb-1">Install Payment App</h3>
+              <p className="text-sm text-white/80">Get faster access & offline support</p>
+            </div>
+            <button 
+              onClick={() => { playClick(); vibrate(20); onInstall(); }}
+              className="w-full h-14 bg-white text-purple-600 text-lg font-bold rounded-2xl active:scale-95 transition-transform shadow-lg"
+            >
+              Install
+            </button>
           </div>
-          <button onClick={() => { playClick(); vibrate(20); onInstall(); }}
-            className="bg-white text-purple-700 text-xs font-bold px-4 py-2 rounded-full active:scale-95 transition-transform">
-            Install
-          </button>
-        </div>
+        </motion.div>
       )}
 
       {/* Recent */}
@@ -544,5 +640,26 @@ function PendingBill({ icon: Icon, color, name, due, amount, onPay }: { icon: Lu
         </button>
       </div>
     </div>
+  );
+}
+
+function ChatPreview({ name, message, time, avatar, color, onClick }: { name: string; message: string; time: string; avatar: string; color: string; onClick: () => void }) {
+  return (
+    <button onClick={() => { playClick(); vibrate(10); onClick(); }}
+      className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-muted/40 active:bg-muted/60 transition-colors text-left">
+      <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${color} text-white flex items-center justify-center font-bold shadow-sm shrink-0`}>
+        {avatar}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-0.5">
+          <p className="text-sm font-semibold truncate">{name}</p>
+          <span className="text-[10px] text-muted-foreground">{time}</span>
+        </div>
+        <p className="text-xs text-muted-foreground truncate">{message}</p>
+      </div>
+      {message.includes("₹") && (
+        <div className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
+      )}
+    </button>
   );
 }
