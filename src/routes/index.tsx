@@ -217,7 +217,6 @@ function Index() {
     }
     
     // Advanced payment features
-    if (id === "split-bill") { setSplitBillNewScreen(true); return; }
     if (id === "pay-nearby") { setNearbyScreen(true); return; }
     if (id === "tap-to-pay") { setTapToPayScreen(true); return; }
     if (id === "scheduled-pay") { setSchedulePaymentScreen(true); return; }
@@ -247,9 +246,7 @@ function Index() {
     }
     
     // Contact & Social features
-    if (id === "pay-contact") { setContactsScreen(true); return; }
     if (id === "favorites") { setFavoritesScreen(true); return; }
-    if (id === "recent") { setRecentScreen(true); return; }
     if (id === "invite") { setInviteScreen(true); return; }
     if (id === "refer") { setReferralScreen(true); return; }
     if (id === "share-app") { setShareScreen(true); return; }
