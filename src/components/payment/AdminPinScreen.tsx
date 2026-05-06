@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ShieldAlert, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { playClick, vibrate, playSuccess } from "@/lib/payment-store";
-import { securityActions, useSecurity } from "@/lib/security-store";
+import { securityActions, useSecurity, getSecurity } from "@/lib/security-store";
 import { ForceChangeCredentialScreen } from "./ForceChangeCredentialScreen";
 
 export function AdminPinScreen({ onBack, onSuccess }: { onBack: () => void; onSuccess: () => void }) {
@@ -11,13 +11,13 @@ export function AdminPinScreen({ onBack, onSuccess }: { onBack: () => void; onSu
   const [error, setError] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const mustChangeAdmin = useSecurity((s) => s.mustChangeAdmin);
-  const [pendingSuccess, setPendingSuccess] = useState(false);
+  const [showForce, setShowForce] = useState(false);
 
-  if (pendingSuccess && mustChangeAdmin) {
+  if (showForce && mustChangeAdmin) {
     return (
       <ForceChangeCredentialScreen
         kind="admin"
-        onDone={() => { setPendingSuccess(false); onSuccess(); }}
+        onDone={() => { setShowForce(false); onSuccess(); }}
       />
     );
   }
@@ -29,20 +29,8 @@ export function AdminPinScreen({ onBack, onSuccess }: { onBack: () => void; onSu
     if (result === "ok") {
       playSuccess(); vibrate([20, 30, 20]);
       setError(false);
-      // Re-read latest state via store hook on next render — set pending and decide
-      setPendingSuccess(true);
-      setTimeout(() => {
-        // If admin password is no longer default, mustChangeAdmin will be false → call onSuccess directly
-        // Use timeout to allow useSecurity subscription to flush.
-        // If still default, the early return above will render the force-change screen.
-      }, 0);
-      // Direct path when no force-change required:
-      requestAnimationFrame(() => {
-        // re-check via fresh import
-        import("@/lib/security-store").then(({ getSecurity }) => {
-          if (!getSecurity().mustChangeAdmin) { setPendingSuccess(false); onSuccess(); }
-        });
-      });
+      if (getSecurity().mustChangeAdmin) setShowForce(true);
+      else onSuccess();
     } else {
       setError(true); vibrate([50, 100, 50]);
       setAttempts((a) => a + 1);
