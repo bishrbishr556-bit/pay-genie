@@ -14,6 +14,7 @@ import { LockScreen } from "@/components/payment/LockScreen";
 import { SecureLockScreen } from "@/components/payment/SecureLockScreen";
 import { SecuritySetupScreen } from "@/components/payment/SecuritySetupScreen";
 import { initSecurity, useSecurity } from "@/lib/security-store";
+import { ForceChangeCredentialScreen } from "@/components/payment/ForceChangeCredentialScreen";
 import { SettingsDetailScreen } from "@/components/payment/SettingsDetailScreen";
 import { FeatureScreen } from "@/components/payment/FeatureScreen";
 import { RechargeScreen, type RechargeKind } from "@/components/payment/RechargeScreen";
@@ -113,6 +114,10 @@ function Index() {
   const [openRewardId, setOpenRewardId] = useState<string | null>(null);
   const unlocked = useStore((s) => s.unlocked);
   const setupComplete = useSecurity((s) => s.setupComplete);
+  const mustChangePin = useSecurity((s) => s.mustChangePin);
+  const mustChangePattern = useSecurity((s) => s.mustChangePattern);
+  const mustChangePassword = useSecurity((s) => s.mustChangePassword);
+  const forceKind = mustChangePin ? "pin" : mustChangePattern ? "pattern" : mustChangePassword ? "password" : null;
 
   useEffect(() => {
     initStore();
@@ -258,6 +263,15 @@ function Index() {
     return (
       <PhoneFrame>
         {setupComplete ? <SecureLockScreen /> : <SecuritySetupScreen />}
+        <Toaster position="top-center" />
+      </PhoneFrame>
+    );
+  }
+
+  if (forceKind) {
+    return (
+      <PhoneFrame>
+        <ForceChangeCredentialScreen kind={forceKind} onDone={() => { /* state updates auto-rerender */ }} />
         <Toaster position="top-center" />
       </PhoneFrame>
     );
