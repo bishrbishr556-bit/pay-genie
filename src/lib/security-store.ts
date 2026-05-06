@@ -15,24 +15,57 @@ export type SecurityState = {
   decoyMode: boolean;            // currently inside decoy environment
   failedAttempts: number;
   lockedUntil: number | null;    // ms timestamp
+  // Demo / force-change tracking
+  defaultPinActive: boolean;
+  defaultPatternActive: boolean;
+  defaultPasswordActive: boolean;
+  defaultAdminActive: boolean;
+  mustChangePin: boolean;
+  mustChangePattern: boolean;
+  mustChangePassword: boolean;
+  mustChangeAdmin: boolean;
+  // Admin
+  adminPasswordHash: string | null;
 };
 
 const KEY = "gpay-security-v1";
 
+// non-cryptographic hash — DEMO ONLY
+function hash(s: string): string {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return `h_${h}_${s.length}`;
+}
+
+// L-shape on a 3x3 grid (top-left → down → right)
+export const DEFAULT_PIN = "1234";
+export const DEFAULT_PATTERN = "0-3-6-7-8";
+export const DEFAULT_PASSWORD = "demo1234";
+export const DEFAULT_ADMIN = "Admin123";
+
 const initial: SecurityState = {
-  setupComplete: false,
-  primary: null,
-  pinHash: null,
-  patternHash: null,
-  passwordHash: null,
-  backupPasswordHash: null,
-  fingerprintEnabled: false,
+  setupComplete: true,
+  primary: "pin",
+  pinHash: hash(DEFAULT_PIN),
+  patternHash: hash(DEFAULT_PATTERN),
+  passwordHash: hash(DEFAULT_PASSWORD),
+  backupPasswordHash: hash(DEFAULT_PASSWORD),
+  fingerprintEnabled: true,
   faceEnabled: false,
   decoyEnabled: false,
   decoyPinHash: null,
   decoyMode: false,
   failedAttempts: 0,
   lockedUntil: null,
+  defaultPinActive: true,
+  defaultPatternActive: true,
+  defaultPasswordActive: true,
+  defaultAdminActive: true,
+  mustChangePin: false,
+  mustChangePattern: false,
+  mustChangePassword: false,
+  mustChangeAdmin: false,
+  adminPasswordHash: hash(DEFAULT_ADMIN),
 };
 
 let state: SecurityState = initial;
@@ -74,13 +107,6 @@ export function useSecurity<T>(selector: (s: SecurityState) => T): T {
 
 export function getSecurity() { return state; }
 
-// non-cryptographic hash — DEMO ONLY
-function hash(s: string): string {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-  return `h_${h}_${s.length}`;
-}
-
 export const securityActions = {
   completeSetup(opts: {
     primary: LockMethod;
@@ -114,7 +140,20 @@ export const securityActions = {
       m === "pattern" ? state.patternHash :
       state.passwordHash;
     if (target && h === target) {
-      state = { ...state, failedAttempts: 0, lockedUntil: null, decoyMode: false };
+      // detect default-credential use → force change after unlock
+      const usedDefault =
+        (m === "pin" && state.defaultPinActive && secret === DEFAULT_PIN) ||
+        (m === "pattern" && state.defaultPatternActive && secret === DEFAULT_PATTERN) ||
+        (m === "password" && state.defaultPasswordActive && secret === DEFAULT_PASSWORD);
+      state = {
+        ...state,
+        failedAttempts: 0,
+        lockedUntil: null,
+        decoyMode: false,
+        mustChangePin: usedDefault && m === "pin" ? true : state.mustChangePin,
+        mustChangePattern: usedDefault && m === "pattern" ? true : state.mustChangePattern,
+        mustChangePassword: usedDefault && m === "password" ? true : state.mustChangePassword,
+      };
       persist();
       return "ok";
     }
@@ -137,6 +176,41 @@ export const securityActions = {
     persist();
     return true;
   },
+  changeSecret(method: LockMethod, newSecret: string) {
+    const h = hash(newSecret);
+    state = {
+      ...state,
+      pinHash: method === "pin" ? h : state.pinHash,
+      patternHash: method === "pattern" ? h : state.patternHash,
+      passwordHash: method === "password" ? h : state.passwordHash,
+      defaultPinActive: method === "pin" ? false : state.defaultPinActive,
+      defaultPatternActive: method === "pattern" ? false : state.defaultPatternActive,
+      defaultPasswordActive: method === "password" ? false : state.defaultPasswordActive,
+      mustChangePin: method === "pin" ? false : state.mustChangePin,
+      mustChangePattern: method === "pattern" ? false : state.mustChangePattern,
+      mustChangePassword: method === "password" ? false : state.mustChangePassword,
+    };
+    persist();
+  },
+  verifyAdmin(password: string): "ok" | "fail" {
+    if (!state.adminPasswordHash) return "fail";
+    if (hash(password) !== state.adminPasswordHash) return "fail";
+    state = {
+      ...state,
+      mustChangeAdmin: state.defaultAdminActive && password === DEFAULT_ADMIN ? true : state.mustChangeAdmin,
+    };
+    persist();
+    return "ok";
+  },
+  changeAdminPassword(newPassword: string) {
+    state = {
+      ...state,
+      adminPasswordHash: hash(newPassword),
+      defaultAdminActive: false,
+      mustChangeAdmin: false,
+    };
+    persist();
+  },
   resetWithBackup(backup: string, newSecret: string): boolean {
     if (!state.backupPasswordHash) return false;
     if (hash(backup) !== state.backupPasswordHash) return false;
@@ -147,6 +221,9 @@ export const securityActions = {
       pinHash: m === "pin" ? h : state.pinHash,
       patternHash: m === "pattern" ? h : state.patternHash,
       passwordHash: m === "password" ? h : state.passwordHash,
+      defaultPinActive: m === "pin" ? false : state.defaultPinActive,
+      defaultPatternActive: m === "pattern" ? false : state.defaultPatternActive,
+      defaultPasswordActive: m === "password" ? false : state.defaultPasswordActive,
       failedAttempts: 0,
       lockedUntil: null,
     };
