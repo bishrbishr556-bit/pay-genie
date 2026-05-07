@@ -249,4 +249,8 @@ export const securityActions = {
     state = initial;
     persist();
   },
+  setAutoLock(ms: number) {
+    state = { ...state, autoLockMs: ms };
+    persist();
+  },
 };
