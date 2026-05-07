@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { actions, upiDirectory, playClick, playSuccess, vibrate, useStore } from "@/lib/payment-store";
-import { ArrowLeft, CheckCircle2, Loader2, Search, Fingerprint, Delete } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2, Search, Fingerprint, Delete, Share2, MoreVertical, ChevronUp, Download, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
@@ -313,34 +313,197 @@ export function PayScreen({ onBack, onShowReward }: { onBack: () => void; onShow
         )}
 
         {step === "success" && lastTxn && (
-          <motion.div key="succ" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center px-5 gap-4">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200, damping: 15 }}
-              className="h-24 w-24 rounded-full bg-emerald-500 flex items-center justify-center shadow-elevated"
-            >
-              <CheckCircle2 className="h-14 w-14 text-white" strokeWidth={2.5} />
-            </motion.div>
-            <p className="text-2xl font-bold">₹{lastTxn.amount}</p>
-            <p className="text-muted-foreground text-sm">Paid to {lastTxn.name}</p>
-            {lastRewardId && (
-              <button
-                onClick={() => onShowReward(lastRewardId)}
-                className="mt-4 gradient-gold text-slate-900 font-bold py-3 px-6 rounded-xl shadow-card active:scale-95 transition-transform"
-              >
-                🎁 You won a scratch card!
-              </button>
-            )}
-            <button
-              onClick={onBack}
-              className="mt-2 text-primary text-sm font-semibold"
-            >
-              Done
-            </button>
-          </motion.div>
+          <SuccessReceipt
+            key="succ"
+            txn={lastTxn}
+            upi={upi}
+            note={note}
+            rewardId={lastRewardId}
+            onShowReward={onShowReward}
+            onDone={onBack}
+            onNewPayment={() => {
+              setStep("input");
+              setUpi(""); setVerifiedName(null); setAmount(""); setNote("");
+              setLastTxn(null); setLastRewardId(null);
+            }}
+          />
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function SuccessReceipt({
+  txn, upi, note, rewardId, onShowReward, onDone, onNewPayment,
+}: {
+  txn: { amount: number; name: string };
+  upi: string;
+  note: string;
+  rewardId: string | null;
+  onShowReward: (id: string) => void;
+  onDone: () => void;
+  onNewPayment: () => void;
+}) {
+  const [open, setOpen] = useState(true);
+  const now = new Date();
+  const dateStr = now.toLocaleString("en-IN", {
+    day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true,
+  });
+  const upiTxnId = String(Math.floor(400000000000 + Math.random() * 99999999999));
+  const refId = "REF" + Math.random().toString(36).slice(2, 12).toUpperCase();
+  const bankingName = txn.name.toUpperCase();
+
+  const handleShare = async () => {
+    playClick();
+    const text = `Payment Successful\n₹${txn.amount} paid to ${txn.name}\nUPI ID: ${upi}\nTxn ID: ${upiTxnId}\n${dateStr}`;
+    try {
+      if (navigator.share) await navigator.share({ title: "Payment Receipt", text });
+      else { await navigator.clipboard.writeText(text); toast.success("Receipt copied"); }
+    } catch { /* ignore */ }
+  };
+
+  const handleDownload = () => {
+    playClick();
+    const blob = new Blob([
+      `PAYMENT RECEIPT\n----------------\nAmount: ₹${txn.amount}\nPaid to: ${txn.name}\nBanking name: ${bankingName}\nUPI ID: ${upi}\nUPI Txn ID: ${upiTxnId}\nReference: ${refId}\nDate: ${dateStr}\n${note ? `Note: ${note}\n` : ""}`,
+    ], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `receipt-${upiTxnId}.txt`; a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Receipt downloaded");
+  };
+
+  return (
+    <motion.div
+      key="succ"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex-1 overflow-y-auto bg-[#f6f7f9] text-slate-900"
+    >
+      {/* Top action bar */}
+      <div className="flex justify-end items-center gap-4 px-5 pt-4">
+        <button onClick={handleShare} className="h-9 w-9 rounded-full hover:bg-black/5 flex items-center justify-center active:scale-90 transition">
+          <Share2 className="h-5 w-5" />
+        </button>
+        <button onClick={handleDownload} className="h-9 w-9 rounded-full hover:bg-black/5 flex items-center justify-center active:scale-90 transition">
+          <Download className="h-5 w-5" />
+        </button>
+        <button className="h-9 w-9 rounded-full hover:bg-black/5 flex items-center justify-center">
+          <MoreVertical className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Hero */}
+      <div className="flex flex-col items-center text-center px-6 pt-2">
+        <motion.div
+          initial={{ scale: 0, rotate: -10 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 220, damping: 14 }}
+          className="h-16 w-16 rounded-full bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30"
+        >
+          <motion.svg initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.4, delay: 0.2 }} viewBox="0 0 24 24" className="h-9 w-9 text-white">
+            <motion.path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.45, delay: 0.18 }}/>
+          </motion.svg>
+        </motion.div>
+        <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="mt-3 text-emerald-700 font-medium">
+          Payment successful
+        </motion.p>
+        <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }} className="mt-3 text-5xl font-semibold tracking-tight">
+          ₹{txn.amount.toLocaleString("en-IN")}
+        </motion.p>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }} className="mt-2 text-slate-700">
+          Paid to {txn.name}
+        </motion.p>
+        <p className="text-xs text-slate-500 mt-1">Banking name: {bankingName}</p>
+        <div className="mt-3 px-3 py-1 rounded-full bg-slate-200/70 text-xs text-slate-700">
+          UPI ID: {upi}
+        </div>
+        <p className="text-xs text-slate-500 mt-2">{dateStr}</p>
+      </div>
+
+      {/* Receipt card */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
+        className="mx-5 mt-5 bg-white rounded-2xl shadow-sm border border-slate-200/70 overflow-hidden"
+      >
+        <button onClick={() => { playClick(); setOpen((o) => !o); }} className="w-full flex items-center gap-3 p-4">
+          <div className="h-9 w-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">SBI</div>
+          <p className="flex-1 text-left font-semibold text-sm">State Bank of India 1825</p>
+          <motion.div animate={{ rotate: open ? 0 : 180 }}>
+            <ChevronUp className="h-5 w-5 text-slate-500" />
+          </motion.div>
+        </button>
+        <AnimatePresence initial={false}>
+          {open && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="px-4 pb-4 text-sm space-y-3"
+            >
+              <Field label="UPI transaction ID" value={upiTxnId} />
+              <Field label={`To: ${bankingName}`} value={upi} />
+              <Field label="From: YOU (State Bank of India)" value="you1234@sbi" />
+              <Field label="Reference ID" value={refId} />
+              {note && <Field label="Note" value={note} />}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* UPI badge */}
+      <p className="text-center text-[10px] tracking-widest text-slate-400 mt-5">POWERED BY</p>
+      <p className="text-center font-bold text-slate-500 italic">UPI</p>
+
+      {rewardId && (
+        <div className="px-5 mt-4">
+          <button
+            onClick={() => onShowReward(rewardId)}
+            className="w-full gradient-gold text-slate-900 font-bold py-3 rounded-2xl shadow-card active:scale-[0.98] transition"
+          >
+            🎁 You won a scratch card!
+          </button>
+        </div>
+      )}
+
+      {/* Trust illustration */}
+      <div className="relative mt-6 h-24 flex items-end justify-center overflow-hidden">
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-blue-100/80 to-transparent" />
+        <ShieldCheck className="relative h-14 w-14 text-blue-500 mb-2" />
+      </div>
+
+      {/* Buttons */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8 }}
+        className="flex gap-3 px-5 py-4 sticky bottom-0 bg-[#f6f7f9]"
+      >
+        <button
+          onClick={onNewPayment}
+          className="flex-1 h-12 rounded-full border-2 border-blue-600 text-blue-700 font-semibold active:scale-[0.98] transition"
+        >
+          New payment
+        </button>
+        <button
+          onClick={onDone}
+          className="flex-1 h-12 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-lg shadow-blue-500/30 active:scale-[0.98] transition"
+        >
+          Done
+        </button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-slate-600">{label}</p>
+      <p className="text-slate-900">{value}</p>
     </div>
   );
 }
