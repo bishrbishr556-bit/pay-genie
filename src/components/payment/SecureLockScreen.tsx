@@ -107,6 +107,28 @@ export function SecureLockScreen() {
         </p>
       </div>
 
+      {/* Method tabs */}
+      <div className="px-6 relative z-10">
+        <div className="flex p-1 rounded-2xl bg-white/10 backdrop-blur gap-1">
+          {(["pin", "pattern", "password"] as LockMethod[]).map((m) => {
+            const Icon = m === "pin" ? Lock : m === "pattern" ? Grid3x3 : KeyRound;
+            const active = method === m;
+            return (
+              <button
+                key={m}
+                onClick={() => { playClick(); setMethod(m); setError(""); }}
+                className={`flex-1 h-10 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition ${
+                  active ? "bg-white text-slate-900 shadow" : "text-white/80 active:scale-95"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {m === "pin" ? "PIN" : m === "pattern" ? "Pattern" : "Password"}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Main */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
         <AnimatePresence mode="wait">
@@ -155,24 +177,14 @@ export function SecureLockScreen() {
           )}
         </div>
 
-        <div className="flex justify-center gap-2 text-[11px]">
-          {(["pin", "pattern", "password"] as LockMethod[]).filter((m) => m !== method).map((m) => (
-            <button
-              key={m}
-              onClick={() => { playClick(); setMethod(m); setError(""); }}
-              className="px-3 py-1.5 rounded-full bg-white/10 active:scale-95 flex items-center gap-1"
-            >
-              {m === "pin" ? <Lock className="h-3 w-3" /> : m === "pattern" ? <Grid3x3 className="h-3 w-3" /> : <KeyRound className="h-3 w-3" />}
-              Use {m}
-            </button>
-          ))}
-        </div>
-
         {backupAvailable && (
           <button onClick={() => { playClick(); setMode("forgot"); }} className="mt-3 w-full text-center text-xs text-blue-300 underline">
             Forgot {method}?
           </button>
         )}
+        <p className="mt-3 text-center text-[10px] text-white/40">
+          Demo: PIN 2222 · L-pattern · Password Admin123
+        </p>
       </div>
     </div>
   );
