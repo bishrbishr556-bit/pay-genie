@@ -26,6 +26,8 @@ export type SecurityState = {
   mustChangeAdmin: boolean;
   // Admin
   adminPasswordHash: string | null;
+  // Auto-lock
+  autoLockMs: number; // 0 = immediate on background; -1 = never
 };
 
 const KEY = "gpay-security-v1";
@@ -38,9 +40,9 @@ function hash(s: string): string {
 }
 
 // L-shape on a 3x3 grid (top-left → down → right)
-export const DEFAULT_PIN = "1234";
+export const DEFAULT_PIN = "2222";
 export const DEFAULT_PATTERN = "0-3-6-7-8";
-export const DEFAULT_PASSWORD = "demo1234";
+export const DEFAULT_PASSWORD = "Admin123";
 export const DEFAULT_ADMIN = "Admin123";
 
 const initial: SecurityState = {
@@ -66,6 +68,7 @@ const initial: SecurityState = {
   mustChangePassword: false,
   mustChangeAdmin: false,
   adminPasswordHash: hash(DEFAULT_ADMIN),
+  autoLockMs: 60_000,
 };
 
 let state: SecurityState = initial;
