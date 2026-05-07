@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { playClick, playSuccess, vibrate } from "@/lib/payment-store";
+import { securityActions, useSecurity } from "@/lib/security-store";
 import type { MoreOptionId } from "./MoreOptionsSheet";
 
 type Props = { id: MoreOptionId; onBack: () => void };
@@ -320,6 +321,15 @@ function UpiBody() {
 function SecurityBody() {
   const [appLock, setAppLock] = useState(true);
   const [bio, setBio] = useState(true);
+  const autoLockMs = useSecurity((s) => s.autoLockMs);
+  const AUTO_OPTS: { label: string; ms: number }[] = [
+    { label: "Immediate", ms: 0 },
+    { label: "30 sec", ms: 30_000 },
+    { label: "1 min", ms: 60_000 },
+    { label: "5 min", ms: 300_000 },
+    { label: "10 min", ms: 600_000 },
+    { label: "Never", ms: -1 },
+  ];
   const devices = [
     { id: "1", name: "iPhone 17 Pro", loc: "Kochi, IN", current: true },
     { id: "2", name: "iPad Air", loc: "Kochi, IN", current: false },
@@ -335,6 +345,27 @@ function SecurityBody() {
       <Card className="overflow-hidden divide-y divide-slate-800/80">
         <Row icon={Lock} label="App Lock" sub="Require unlock to open the app" right={<Toggle checked={appLock} onChange={setAppLock} />} />
         <Row icon={Fingerprint} label="Fingerprint / Face Unlock" sub="Use biometrics for payments" right={<Toggle checked={bio} onChange={setBio} />} />
+      </Card>
+
+      <SectionTitle>AUTO-LOCK TIMER</SectionTitle>
+      <Card className="p-3">
+        <p className="text-xs text-slate-400 mb-3 px-1">Lock the app after a period of inactivity</p>
+        <div className="grid grid-cols-3 gap-2">
+          {AUTO_OPTS.map((o) => {
+            const active = autoLockMs === o.ms;
+            return (
+              <button
+                key={o.ms}
+                onClick={() => { playClick(); vibrate(8); securityActions.setAutoLock(o.ms); toast.success(`Auto-lock: ${o.label}`); }}
+                className={`h-10 rounded-xl text-xs font-semibold transition active:scale-95 ${
+                  active ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30" : "bg-slate-800/80 text-slate-300"
+                }`}
+              >
+                {o.label}
+              </button>
+            );
+          })}
+        </div>
       </Card>
 
       <SectionTitle>LOGGED-IN DEVICES</SectionTitle>
