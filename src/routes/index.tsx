@@ -56,6 +56,7 @@ const SETTINGS_IDS = new Set<MoreOptionId>([
   "theme", "language", "help", "refer", "activity", "devices", "delete-account",
 ]);
 import { initStore, useStore } from "@/lib/payment-store";
+import { useAutoLock } from "@/lib/use-auto-lock";
 import { WifiOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -77,6 +78,7 @@ export const Route = createFileRoute("/")({
 type Screen = Tab | "merchant" | "scanner";
 
 function Index() {
+  useAutoLock();
   const [tab, setTab] = useState<Tab>("home");
   const [overlay, setOverlay] = useState<"merchant" | "scanner" | null>(null);
   const [moreOpt, setMoreOpt] = useState<MoreOptionId | null>(null);
