@@ -29,14 +29,18 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Jk Pay" },
+      { name: "description", content: "Google Pay–style web app with offline PWA, rewards, and simulated payments (UPI/QR) plus rich UI, sound, and analytics." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Jk Pay" },
+      { property: "og:description", content: "Google Pay–style web app with offline PWA, rewards, and simulated payments (UPI/QR) plus rich UI, sound, and analytics." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Jk Pay" },
+      { name: "twitter:description", content: "Google Pay–style web app with offline PWA, rewards, and simulated payments (UPI/QR) plus rich UI, sound, and analytics." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0fcec8f1-c4d9-480f-9deb-e4682f98c665/id-preview-3d8357c5--c52ba0db-c409-4f42-ae0d-953728e84160.lovable.app-1778127037715.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0fcec8f1-c4d9-480f-9deb-e4682f98c665/id-preview-3d8357c5--c52ba0db-c409-4f42-ae0d-953728e84160.lovable.app-1778127037715.png" },
     ],
     links: [
       {
